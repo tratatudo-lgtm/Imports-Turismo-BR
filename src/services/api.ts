@@ -38,8 +38,8 @@ const SITE_KEY = 'imports-turismo-br';
 async function baseFetcher<T>(baseUrl: string, endpoint: string, options?: RequestInit, appendSiteKey: boolean = false): Promise<T> {
   const url = new URL(`${baseUrl}${endpoint}`);
   
-  // For GET requests, append site_key to query params if requested
-  if (appendSiteKey && (options?.method === 'GET' || !options?.method)) {
+  // Append site_key to query params if requested
+  if (appendSiteKey) {
     url.searchParams.append('site_key', SITE_KEY);
   }
 
@@ -73,6 +73,9 @@ const publicFetcher = <T>(endpoint: string, options?: RequestInit) =>
 
 const privateFetcher = <T>(endpoint: string, options?: RequestInit) => 
   baseFetcher<T>(PRIVATE_API_BASE_URL, endpoint, options, false);
+
+const adminFetcher = <T>(endpoint: string, options?: RequestInit) => 
+  baseFetcher<T>(PRIVATE_API_BASE_URL, endpoint, options, true);
 
 export const apiService = {
   // Public Endpoints (using publicFetcher)
@@ -131,10 +134,10 @@ export const apiService = {
 
   // Admin Dashboard (Session-based)
   getAdminTickets: () => 
-    privateFetcher<any>('/admin/tickets').then(res => res.tickets || []),
+    adminFetcher<any>('/admin/tickets').then(res => res.tickets || []),
   
   getAdminTicketStats: () => 
-    privateFetcher<any>('/admin/tickets/stats').then(res => res.stats || { 
+    adminFetcher<any>('/admin/tickets/stats').then(res => res.stats || { 
       totalTickets: 0, 
       activeTickets: 0, 
       complaints: 0, 
@@ -144,17 +147,17 @@ export const apiService = {
   
   // Admin CRM
   getAdminClients: () => 
-    privateFetcher<any>('/admin/clients').then(res => res.clients || []),
+    adminFetcher<any>('/admin/clients').then(res => res.clients || []),
   
   getAdminClientDetail: (id: string) => 
-    privateFetcher<any>(`/admin/clients/${id}`).then(res => res.client || res),
+    adminFetcher<any>(`/admin/clients/${id}`).then(res => res.client || res),
 
   // Admin Sales
   getAdminSales: () => 
-    privateFetcher<any>('/admin/sales').then(res => res.sales || []),
+    adminFetcher<any>('/admin/sales').then(res => res.sales || []),
 
   getAdminSalesStats: () => 
-    privateFetcher<any>('/admin/sales/stats').then(res => res.stats || { 
+    adminFetcher<any>('/admin/sales/stats').then(res => res.stats || { 
       totalSales: 0, 
       activeSubscriptions: 0, 
       trialSubscriptions: 0, 
@@ -166,43 +169,43 @@ export const apiService = {
 
   // Admin Travel Module
   getAdminTravelOrders: () =>
-    privateFetcher<any>('/admin/travel/orders').then(res => res.orders || []),
+    adminFetcher<any>('/admin/travel/orders').then(res => res.orders || []),
 
   getAdminTravelOrderDetail: (id: string) =>
-    privateFetcher<any>(`/admin/travel/orders/${id}`).then(res => res.order || res),
+    adminFetcher<any>(`/admin/travel/orders/${id}`).then(res => res.order || res),
 
   createAdminTravelOrder: (data: any) =>
-    privateFetcher<any>('/admin/travel/orders', {
+    adminFetcher<any>('/admin/travel/orders', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
 
   updateAdminTravelOrder: (id: string, data: any) =>
-    privateFetcher<any>(`/admin/travel/orders/${id}`, {
+    adminFetcher<any>(`/admin/travel/orders/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data)
     }),
 
   getAdminTravelPayments: () =>
-    privateFetcher<any>('/admin/travel/payments').then(res => res.payments || []),
+    adminFetcher<any>('/admin/travel/payments').then(res => res.payments || []),
 
   getAdminTravelPaymentDetail: (id: string) =>
-    privateFetcher<any>(`/admin/travel/payments/${id}`).then(res => res.payment || res),
+    adminFetcher<any>(`/admin/travel/payments/${id}`).then(res => res.payment || res),
 
   createAdminTravelPayment: (data: any) =>
-    privateFetcher<any>('/admin/travel/payments', {
+    adminFetcher<any>('/admin/travel/payments', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
 
   updateAdminTravelPayment: (id: string, data: any) =>
-    privateFetcher<any>(`/admin/travel/payments/${id}`, {
+    adminFetcher<any>(`/admin/travel/payments/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data)
     }),
 
   getAdminTravelStats: () =>
-    privateFetcher<any>('/admin/travel/stats').then(res => res.stats || {
+    adminFetcher<any>('/admin/travel/stats').then(res => res.stats || {
       totalOrders: 0,
       awaitingPaymentOrders: 0,
       confirmedOrders: 0,
@@ -212,39 +215,39 @@ export const apiService = {
     }),
 
   getAdminClientTravelOrders: (id: string) =>
-    privateFetcher<any>(`/admin/clients/${id}/travel-orders`).then(res => res.orders || []),
+    adminFetcher<any>(`/admin/clients/${id}/travel-orders`).then(res => res.orders || []),
 
   getAdminClientTravelPayments: (id: string) =>
-    privateFetcher<any>(`/admin/clients/${id}/travel-payments`).then(res => res.payments || []),
+    adminFetcher<any>(`/admin/clients/${id}/travel-payments`).then(res => res.payments || []),
 
   updateTicketStatus: (id: string, status: string) =>
-    privateFetcher<any>(`/admin/tickets/${id}/status`, {
+    adminFetcher<any>(`/admin/tickets/${id}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status })
     }),
 
   // Legacy Admin Dashboard (requires token) - Keep for compatibility if needed, but we'll use new ones
   getDashboard: () => 
-    privateFetcher<DashboardStats>('/admin/dashboard'),
+    adminFetcher<DashboardStats>('/admin/dashboard'),
   
   // Legacy Admin CRM
   getCRM: () => 
-    privateFetcher<Customer[]>('/admin/crm'),
+    adminFetcher<Customer[]>('/admin/crm'),
   
   getCustomerDetail: (id: string) => 
-    privateFetcher<Customer>(`/admin/crm/${id}`),
+    adminFetcher<Customer>(`/admin/crm/${id}`),
 
   // Legacy Admin Orders
   getAdminPedidos: () => 
-    privateFetcher<QuoteRequest[]>('/admin/pedidos'),
+    adminFetcher<QuoteRequest[]>('/admin/pedidos'),
 
   // Legacy Admin Complaints
   getAdminReclamacoes: () => 
-    privateFetcher<Complaint[]>('/admin/reclamacoes'),
+    adminFetcher<Complaint[]>('/admin/reclamacoes'),
 
   // Legacy Admin Sales
   getAdminVendas: () => 
-    privateFetcher<Sale[]>('/admin/vendas'),
+    adminFetcher<Sale[]>('/admin/vendas'),
 
   // Client Auth
   requestClientOtp: (phoneNumber: string) => 
