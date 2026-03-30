@@ -100,10 +100,10 @@ export const apiService = {
 
   // Admin Auth (using privateFetcher)
   requestOtp: (phoneNumber: string) => 
-    privateFetcher<OtpResponse>('/admin/request-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
+    privateFetcher<OtpResponse>('/auth/send-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
   
   verifyOtp: (phoneNumber: string, otp: string) => 
-    privateFetcher<VerifyOtpResponse>('/admin/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
+    privateFetcher<VerifyOtpResponse>('/auth/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
 
   // Admin Dashboard (requires token)
   getDashboard: (token: string) => 
@@ -142,16 +142,16 @@ export const apiService = {
 
   // Client Auth
   requestClientOtp: (phoneNumber: string) => 
-    privateFetcher<OtpResponse>('/client/request-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
+    privateFetcher<OtpResponse>('/auth/send-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
   
   verifyClientOtp: (phoneNumber: string, otp: string) => 
-    privateFetcher<ClientSession>('/client/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
+    privateFetcher<ClientSession>('/auth/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
 
   requestMagicLink: (email: string) => 
-    privateFetcher<MagicLinkResponse>('/client/request-magic-link', { method: 'POST', body: JSON.stringify({ email }) }),
+    privateFetcher<MagicLinkResponse>('/auth/request-magic-link', { method: 'POST', body: JSON.stringify({ email }) }),
   
   verifyMagicLink: (token: string) => 
-    privateFetcher<ClientSession>('/client/verify-magic-link', { method: 'POST', body: JSON.stringify({ token }) }),
+    privateFetcher<ClientSession>('/auth/verify-magic-link', { method: 'POST', body: JSON.stringify({ token }) }),
 
   // Client Area (requires token)
   getClientDashboard: (token: string) => 
