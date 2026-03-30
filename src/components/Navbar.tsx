@@ -37,6 +37,11 @@ export const Navbar = () => {
     { name: 'Área Cliente', href: '/cliente/login' },
   ];
 
+  const mobileNavLinks = [
+    ...navLinks,
+    { name: 'Área Admin', href: '/admin/login' },
+  ];
+
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -123,7 +128,7 @@ export const Navbar = () => {
             className="md:hidden absolute top-full left-6 right-6 mt-4 bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-8 shadow-2xl shadow-blue-900/20 border border-white/20 z-40 overflow-hidden"
           >
             <div className="flex flex-col gap-4">
-              {navLinks.map((link, i) => (
+              {mobileNavLinks.map((link, i) => (
                 <motion.div
                   key={link.name}
                   initial={{ opacity: 0, x: -20 }}
@@ -145,18 +150,25 @@ export const Navbar = () => {
                   </Link>
                 </motion.div>
               ))}
-              <Button 
-                className="w-full h-14 mt-6 rounded-2xl text-lg font-bold"
-                onClick={() => window.open(`https://wa.me/${siteConfig.whatsapp}`, '_blank')}
-              >
-                <Phone className="w-5 h-5 mr-2" />
-                WhatsApp Comercial
-              </Button>
-              <Link to="/cliente/login" className="w-full">
-                <Button variant="outline" className="w-full h-14 rounded-2xl text-lg font-bold border-blue-100 text-blue-600">
-                  Entrar na Área Cliente
+              <div className="flex flex-col gap-3 mt-6">
+                <Button 
+                  className="w-full h-14 rounded-2xl text-lg font-bold"
+                  onClick={() => window.open(`https://wa.me/${siteConfig.whatsapp}`, '_blank')}
+                >
+                  <Phone className="w-5 h-5 mr-2" />
+                  WhatsApp Comercial
                 </Button>
-              </Link>
+                <Link to="/cliente/login" className="w-full">
+                  <Button variant="outline" className="w-full h-14 rounded-2xl text-lg font-bold border-blue-100 text-blue-600">
+                    Entrar na Área Cliente
+                  </Button>
+                </Link>
+                <Link to="/admin/login" className="w-full">
+                  <Button variant="outline" className="w-full h-14 rounded-2xl text-lg font-bold border-blue-100 text-blue-600">
+                    Entrar na Área Admin
+                  </Button>
+                </Link>
+              </div>
             </div>
           </motion.div>
         )}

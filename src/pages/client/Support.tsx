@@ -182,9 +182,11 @@ export default function ClientSupport() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button className="bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-600/20">
-              <Plus className="w-4 h-4 mr-2" /> Novo Pedido
-            </Button>
+            <Link to="/orcamento">
+              <Button className="bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-600/20">
+                <Plus className="w-4 h-4 mr-2" /> Novo Pedido
+              </Button>
+            </Link>
           </div>
         </div>
 
