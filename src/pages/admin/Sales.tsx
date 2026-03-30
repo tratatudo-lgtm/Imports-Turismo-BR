@@ -228,7 +228,7 @@ export default function AdminSales() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-xs text-gray-400">
-                        {new Date(sale.data).toLocaleDateString()}
+                        {new Date(sale.createdAt || '').toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">

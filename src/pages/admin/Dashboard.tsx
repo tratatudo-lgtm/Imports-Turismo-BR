@@ -24,13 +24,15 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { apiService } from '../../services/api';
-import { DashboardStats } from '../../types';
+import { QuoteRequest, Complaint, Customer } from '../../types';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [orders, setOrders] = useState<QuoteRequest[]>([]);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'leads' | 'pedidos' | 'reclamacoes'>('pedidos');
@@ -44,10 +46,17 @@ export default function AdminDashboard() {
       return;
     }
 
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const data = await apiService.getDashboard(token);
-        setStats(data);
+        const [pedidosRes, reclamacoesRes, crmRes] = await Promise.all([
+          apiService.getAdminPedidos(token).catch(() => []),
+          apiService.getAdminReclamacoes(token).catch(() => []),
+          apiService.getCRM(token).catch(() => [])
+        ]);
+
+        setOrders(pedidosRes);
+        setComplaints(reclamacoesRes);
+        setCustomers(crmRes);
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar dados do dashboard.');
         if (err.message?.includes('401')) {
@@ -59,7 +68,7 @@ export default function AdminDashboard() {
       }
     };
 
-    fetchStats();
+    fetchData();
   }, [token, navigate]);
 
   const handleLogout = () => {
@@ -67,6 +76,17 @@ export default function AdminDashboard() {
     localStorage.removeItem('admin_phone');
     navigate('/admin/login');
   };
+
+  // Calculate metrics based on real data
+  const totalTickets = orders.length + complaints.length;
+  
+  const activeStatuses = ['new', 'open', 'aberto', 'pendente', 'recebido', 'em análise', 'em_analise', 'in_progress'];
+  const activeRequests = orders.filter(o => 
+    activeStatuses.includes((o.status || '').toLowerCase())
+  ).length;
+
+  const totalComplaints = complaints.length;
+  const totalLeads = customers.length; // Using CRM as leads source
 
   if (isLoading) {
     return (
@@ -148,14 +168,14 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total de Leads</p>
-                  <h3 className="text-3xl font-bold text-blue-950">{stats?.totalLeads ?? '-'}</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">{totalLeads}</h3>
                 </div>
                 <div className="bg-blue-50 p-3 rounded-2xl">
                   <Users className="text-blue-600 w-6 h-6" />
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
-                <span>Dados acumulados</span>
+                <span>Dados do CRM</span>
               </div>
             </Card>
           </motion.div>
@@ -165,14 +185,14 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Pedidos Ativos</p>
-                  <h3 className="text-3xl font-bold text-blue-950">{stats?.totalPedidos ?? '-'}</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">{activeRequests}</h3>
                 </div>
                 <div className="bg-amber-50 p-3 rounded-2xl">
                   <ShoppingBag className="text-amber-600 w-6 h-6" />
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
-                <span>Total de pedidos registados</span>
+                <span>Total: {orders.length}</span>
               </div>
             </Card>
           </motion.div>
@@ -182,14 +202,14 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Reclamações</p>
-                  <h3 className="text-3xl font-bold text-blue-950">{stats?.totalReclamacoes ?? '-'}</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">{totalComplaints}</h3>
                 </div>
                 <div className="bg-red-50 p-3 rounded-2xl">
                   <AlertTriangle className="text-red-600 w-6 h-6" />
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
-                <span>Total de reclamações registadas</span>
+                <span>Total de reclamações</span>
               </div>
             </Card>
           </motion.div>
@@ -198,15 +218,15 @@ export default function AdminDashboard() {
             <Card className="p-6 border-none shadow-sm hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Taxa de Conversão</p>
-                  <h3 className="text-3xl font-bold text-blue-950">-</h3>
+                  <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total Tickets</p>
+                  <h3 className="text-3xl font-bold text-blue-950">{totalTickets}</h3>
                 </div>
                 <div className="bg-green-50 p-3 rounded-2xl">
                   <CheckCircle2 className="text-green-600 w-6 h-6" />
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
-                <span>Métrica em análise</span>
+                <span>Volume total</span>
               </div>
             </Card>
           </motion.div>
@@ -257,7 +277,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {activeTab === 'pedidos' && stats?.recentPedidos.map((pedido, i) => (
+                    {activeTab === 'pedidos' && orders.slice(0, 10).map((pedido, i) => (
                       <tr key={i} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -277,87 +297,95 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4">
                           <span className={cn(
                             "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                            pedido.status === 'pendente' ? "bg-amber-100 text-amber-600" : "bg-green-100 text-green-600"
+                            activeStatuses.includes((pedido.status || '').toLowerCase()) ? "bg-amber-100 text-amber-600" : "bg-green-100 text-green-600"
                           )}>
-                            {pedido.status}
+                            {pedido.status || 'pendente'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-xs text-gray-400">
                           {new Date(pedido.createdAt || '').toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                          <button onClick={() => navigate('/admin/pedidos')} className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
                             <MoreHorizontal className="w-5 h-5" />
                           </button>
                         </td>
                       </tr>
                     ))}
-                    {activeTab === 'leads' && stats?.recentLeads.map((lead, i) => (
+                    {activeTab === 'leads' && customers.slice(0, 10).map((customer, i) => (
                       <tr key={i} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 font-bold">
-                              {lead.nome.charAt(0)}
+                              {customer.nome.charAt(0)}
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-blue-950">{lead.nome}</p>
-                              <p className="text-xs text-gray-400">{lead.telefone}</p>
+                              <p className="text-sm font-bold text-blue-950">{customer.nome}</p>
+                              <p className="text-xs text-gray-400">{customer.telefone}</p>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <p className="text-sm font-medium text-gray-600">{lead.origem || 'Website'}</p>
+                          <p className="text-sm font-medium text-gray-600">{customer.email}</p>
                         </td>
                         <td className="px-6 py-4">
                           <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-600">
-                            Novo Lead
+                            Cliente CRM
                           </span>
                         </td>
                         <td className="px-6 py-4 text-xs text-gray-400">
-                          {new Date(lead.createdAt || '').toLocaleDateString()}
+                          {new Date(customer.createdAt || '').toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                          <button onClick={() => navigate('/admin/crm')} className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
                             <MoreHorizontal className="w-5 h-5" />
                           </button>
                         </td>
                       </tr>
                     ))}
-                    {activeTab === 'reclamacoes' && stats?.recentReclamacoes.map((reclamacao, i) => (
+                    {activeTab === 'reclamacoes' && complaints.slice(0, 10).map((reclamacao, i) => (
                       <tr key={i} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold">
-                              {reclamacao.nome.charAt(0)}
+                              {reclamacao.cliente.charAt(0)}
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-blue-950">{reclamacao.nome}</p>
-                              <p className="text-xs text-gray-400">{reclamacao.telefone}</p>
+                              <p className="text-sm font-bold text-blue-950">{reclamacao.cliente}</p>
+                              <p className="text-xs text-gray-400">{reclamacao.referencia}</p>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
                           <p className="text-sm font-medium text-gray-600 truncate max-w-xs">{reclamacao.descricao}</p>
-                          <p className="text-xs text-gray-400 font-mono">{reclamacao.referencia}</p>
                         </td>
                         <td className="px-6 py-4">
                           <span className={cn(
                             "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                            reclamacao.status === 'pendente' ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
+                            reclamacao.status === 'aberta' ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
                           )}>
                             {reclamacao.status || 'pendente'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-xs text-gray-400">
-                          {new Date(reclamacao.createdAt || '').toLocaleDateString()}
+                          {new Date(reclamacao.data || '').toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                          <button onClick={() => navigate('/admin/reclamacoes')} className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
                             <MoreHorizontal className="w-5 h-5" />
                           </button>
                         </td>
                       </tr>
                     ))}
+                    {((activeTab === 'pedidos' && orders.length === 0) || 
+                      (activeTab === 'leads' && customers.length === 0) || 
+                      (activeTab === 'reclamacoes' && complaints.length === 0)) && (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center text-gray-400 italic">
+                          Nenhum registo encontrado nesta categoria.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
