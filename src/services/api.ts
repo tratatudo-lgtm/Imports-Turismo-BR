@@ -154,39 +154,27 @@ export const apiService = {
     }),
 
   // Legacy Admin Dashboard (requires token) - Keep for compatibility if needed, but we'll use new ones
-  getDashboard: (token?: string) => 
-    privateFetcher<DashboardStats>('/admin/dashboard', { 
-      headers: token ? { Authorization: `Bearer ${token}` } : {} 
-    }),
+  getDashboard: () => 
+    privateFetcher<DashboardStats>('/admin/dashboard'),
   
   // Legacy Admin CRM
-  getCRM: (token?: string) => 
-    privateFetcher<Customer[]>('/admin/crm', { 
-      headers: token ? { Authorization: `Bearer ${token}` } : {} 
-    }),
+  getCRM: () => 
+    privateFetcher<Customer[]>('/admin/crm'),
   
-  getCustomerDetail: (token: string | undefined, id: string) => 
-    privateFetcher<Customer>(`/admin/crm/${id}`, { 
-      headers: token ? { Authorization: `Bearer ${token}` } : {} 
-    }),
+  getCustomerDetail: (id: string) => 
+    privateFetcher<Customer>(`/admin/crm/${id}`),
 
   // Legacy Admin Orders
-  getAdminPedidos: (token?: string) => 
-    privateFetcher<QuoteRequest[]>('/admin/pedidos', { 
-      headers: token ? { Authorization: `Bearer ${token}` } : {} 
-    }),
+  getAdminPedidos: () => 
+    privateFetcher<QuoteRequest[]>('/admin/pedidos'),
 
   // Legacy Admin Complaints
-  getAdminReclamacoes: (token?: string) => 
-    privateFetcher<Complaint[]>('/admin/reclamacoes', { 
-      headers: token ? { Authorization: `Bearer ${token}` } : {} 
-    }),
+  getAdminReclamacoes: () => 
+    privateFetcher<Complaint[]>('/admin/reclamacoes'),
 
   // Legacy Admin Sales
-  getAdminVendas: (token?: string) => 
-    privateFetcher<Sale[]>('/admin/vendas', { 
-      headers: token ? { Authorization: `Bearer ${token}` } : {} 
-    }),
+  getAdminVendas: () => 
+    privateFetcher<Sale[]>('/admin/vendas'),
 
   // Client Auth
   requestClientOtp: (phoneNumber: string) => 

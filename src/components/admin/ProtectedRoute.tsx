@@ -19,10 +19,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const verifySession = async () => {
       try {
         const session = await apiService.getAdminSession();
-        if (session.phoneNumber) {
-          localStorage.setItem('admin_phone', session.phoneNumber);
+        if (session.authenticated === true) {
+          localStorage.setItem('admin_phone', session.phone_e164 || '');
+          setIsVerifying(false);
+        } else {
+          localStorage.removeItem('admin_phone');
+          navigate('/admin/login');
         }
-        setIsVerifying(false);
       } catch (err) {
         console.error('Sessão admin inválida:', err);
         localStorage.removeItem('admin_phone');

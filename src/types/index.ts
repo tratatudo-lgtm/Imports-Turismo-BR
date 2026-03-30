@@ -188,7 +188,8 @@ export interface OtpResponse {
 }
 
 export interface VerifyOtpResponse {
-  token: string;
+  message?: string;
+  authenticated?: boolean;
 }
 
 export interface MagicLinkResponse {
@@ -205,8 +206,8 @@ export interface DashboardStats {
 }
 
 export interface AdminSession {
-  token: string;
-  phoneNumber: string;
+  authenticated: boolean;
+  phone_e164?: string;
 }
 
 export interface ClientSession {
