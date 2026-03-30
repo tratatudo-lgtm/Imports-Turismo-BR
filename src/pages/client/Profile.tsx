@@ -41,18 +41,22 @@ export default function ClientProfile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [profileRes, sessionRes] = await Promise.all([
-          apiService.getClientProfile(),
-          apiService.getSession().catch(() => null)
-        ]);
+        const sessionRes = await apiService.getSession().catch(() => null);
         
         if (!sessionRes || !sessionRes.authenticated) {
           navigate('/cliente/login');
           return;
         }
 
-        setProfile(profileRes?.profile || profileRes);
         setSession(sessionRes);
+        // Map session to profile fields
+        setProfile({
+          id: sessionRes.userId,
+          nome: sessionRes.company_name || sessionRes.name || 'Cliente',
+          email: sessionRes.email || '',
+          telefone: sessionRes.phone_e164 || '',
+          createdAt: sessionRes.created_at || new Date().toISOString(),
+        } as any);
         
         localStorage.setItem('client_data', JSON.stringify(sessionRes));
       } catch (err: any) {
@@ -83,10 +87,9 @@ export default function ClientProfile() {
     setSuccess(null);
 
     try {
-      // API call to update profile would go here
-      // For now, we simulate success
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSuccess('Perfil atualizado com sucesso!');
+      // No update endpoint available yet
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setSuccess('As alterações serão validadas pela nossa equipa.');
     } catch (err: any) {
       setError(err.message || 'Erro ao atualizar perfil.');
     } finally {

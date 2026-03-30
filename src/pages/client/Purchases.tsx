@@ -88,7 +88,7 @@ export default function ClientPurchases() {
     
     if (isComplaint) return false;
 
-    const matchesSearch = (t.reference || t.id || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = (t.tracking_code || t.id || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
                          (t.subject || t.title || t.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (t.status || '').toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -186,10 +186,10 @@ export default function ClientPurchases() {
                     </div>
                     <div className="space-y-4 flex-grow">
                       <div className="flex items-center gap-3">
-                        <span className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">{ticket.reference || ticket.id}</span>
+                        <span className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">{ticket.tracking_code || ticket.id}</span>
                         <span className={cn(
                           "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                          ticket.status === 'Pago' || ticket.status === 'Concluído' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                          ['pago', 'concluído', 'resolvido', 'closed', 'finalizado'].includes((ticket.status || '').toLowerCase()) ? 'bg-green-50 text-green-600 border-green-100' : 'bg-blue-50 text-blue-600 border-blue-100'
                         )}>
                           {ticket.status}
                         </span>
@@ -199,7 +199,7 @@ export default function ClientPurchases() {
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
                         <div className="flex items-center gap-2 text-gray-500">
                           <Calendar className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm font-medium">{new Date(ticket.createdAt || ticket.updatedAt).toLocaleDateString()}</span>
+                          <span className="text-sm font-medium">{new Date(ticket.created_at || ticket.updated_at).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-500">
                           <CreditCard className="w-4 h-4 text-blue-600" />
@@ -207,7 +207,7 @@ export default function ClientPurchases() {
                         </div>
                         <div className="flex items-center gap-2 text-gray-500">
                           <MapPin className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm font-medium">{ticket.destination || 'Brasil / Mundo'}</span>
+                          <span className="text-sm font-medium">{ticket.metadata?.destination || ticket.destination || 'Geral'}</span>
                         </div>
                       </div>
                     </div>

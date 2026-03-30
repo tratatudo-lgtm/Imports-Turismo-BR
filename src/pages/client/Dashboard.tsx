@@ -181,11 +181,11 @@ export default function ClientDashboard() {
           <Card className="p-6 border-none shadow-sm space-y-4 bg-white hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
               <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
-                <TrendingUp className="w-6 h-6" />
+                <MessageSquare className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total de Leads</p>
-                <p className="text-2xl font-bold text-blue-950">{stats?.totalLeads ?? stats?.leads_count ?? '—'}</p>
+                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total de Interações</p>
+                <p className="text-2xl font-bold text-blue-950">{stats?.messages ?? stats?.totalMessages ?? 0}</p>
               </div>
             </div>
           </Card>
@@ -217,8 +217,8 @@ export default function ClientDashboard() {
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Taxa de Conversão</p>
-                <p className="text-2xl font-bold text-blue-950">{stats?.conversionRate ?? 'Em análise'}</p>
+                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total de Tickets</p>
+                <p className="text-2xl font-bold text-blue-950">{stats?.totalTickets ?? tickets.length}</p>
               </div>
             </div>
           </Card>
@@ -245,16 +245,16 @@ export default function ClientDashboard() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{ticket.reference || ticket.id}</span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{ticket.tracking_code || ticket.id}</span>
                             <span className={cn(
                               "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border",
-                              ticket.status === 'Concluído' || ticket.status === 'Resolvido' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                              ['concluído', 'resolvido', 'closed', 'finalizado'].includes((ticket.status || '').toLowerCase()) ? 'bg-green-50 text-green-600 border-green-100' : 'bg-blue-50 text-blue-600 border-blue-100'
                             )}>
                               {ticket.status}
                             </span>
                           </div>
                           <h3 className="font-bold text-blue-950">{ticket.subject || ticket.title || 'Pedido de Viagem'}</h3>
-                          <p className="text-sm text-gray-500">{ticket.category || 'Geral'} • {new Date(ticket.createdAt || ticket.updatedAt).toLocaleDateString()}</p>
+                          <p className="text-sm text-gray-500">{ticket.metadata?.destination || ticket.destination || ticket.category || 'Geral'} • {new Date(ticket.updated_at || ticket.created_at).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <Link to={`/cliente/apoio`}>

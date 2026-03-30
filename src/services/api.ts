@@ -188,17 +188,17 @@ export const apiService = {
     privateFetcher<any[]>(`/client/tickets/${id}/history`),
   
   getClientPurchases: () => 
-    privateFetcher<Sale[]>('/client/compras'),
+    privateFetcher<{ ok: boolean; tickets: any[] }>('/client/tickets'),
   
   getClientDocuments: () => 
-    privateFetcher<{ ok: boolean; documents: ClientDocument[] }>('/client/documentos'),
+    privateFetcher<{ ok: boolean; documents: any[] }>('/client/documents'),
   
   downloadDocument: (id: string) => 
-    privateFetcher<Blob>(`/client/documentos/${id}/download`),
+    privateFetcher<Blob>(`/client/documents/${id}/download`),
   
   getClientSupport: () => 
-    privateFetcher<{ ok: boolean; tickets: Complaint[] }>('/client/apoio'),
+    privateFetcher<{ ok: boolean; tickets: any[] }>('/client/tickets'),
   
   getClientProfile: () => 
-    privateFetcher<{ ok: boolean; profile: Customer }>('/client/perfil'),
+    privateFetcher<any>('/auth/session'),
 };

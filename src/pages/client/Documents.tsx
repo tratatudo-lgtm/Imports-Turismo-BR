@@ -59,7 +59,17 @@ export default function ClientDocuments() {
           return;
         }
 
-        setDocuments(docsRes?.documents || docsRes || []);
+        // Map documents with robust fallbacks
+        const rawDocs = docsRes?.documents || docsRes || [];
+        const mappedDocs = Array.isArray(rawDocs) ? rawDocs.map((doc: any) => ({
+          id: doc.id || doc.document_id || Math.random().toString(36).substr(2, 9),
+          nome: doc.name || doc.title || doc.nome || 'Documento',
+          tipo: doc.type || doc.document_type || doc.tipo || 'documento',
+          data: doc.created_at || doc.issue_date || doc.data || new Date().toISOString(),
+          url: doc.url || doc.download_url || ''
+        })) : [];
+
+        setDocuments(mappedDocs);
         setSession(sessionRes);
         
         localStorage.setItem('client_data', JSON.stringify(sessionRes));
@@ -96,12 +106,13 @@ export default function ClientDocuments() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Erro ao descarregar documento:', err);
+      alert('Não foi possível descarregar o documento neste momento.');
     }
   };
 
   const filteredDocuments = documents.filter(d => 
-    d.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    d.tipo.toLowerCase().includes(searchTerm.toLowerCase())
+    (d.nome || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (d.tipo || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getDocIcon = (tipo: string) => {

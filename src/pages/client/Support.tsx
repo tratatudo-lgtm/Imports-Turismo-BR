@@ -90,7 +90,7 @@ export default function ClientSupport() {
     
     if (!isComplaint) return false;
 
-    const matchesSearch = (t.reference || t.id || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = (t.tracking_code || t.id || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
                          (t.subject || t.title || t.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (t.status || '').toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -99,10 +99,22 @@ export default function ClientSupport() {
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'aberta': return 'bg-red-50 text-red-600 border-red-100';
-      case 'em_analise': return 'bg-blue-50 text-blue-600 border-blue-100';
-      case 'resolvida': return 'bg-green-50 text-green-600 border-green-100';
-      case 'fechada': return 'bg-gray-100 text-gray-400 border-gray-200';
+      case 'aberta': 
+      case 'new':
+      case 'open':
+        return 'bg-red-50 text-red-600 border-red-100';
+      case 'em_analise': 
+      case 'em análise':
+      case 'in_progress':
+        return 'bg-blue-50 text-blue-600 border-blue-100';
+      case 'resolvida': 
+      case 'resolvido':
+      case 'concluído':
+        return 'bg-green-50 text-green-600 border-green-100';
+      case 'fechada': 
+      case 'closed':
+      case 'finalizado':
+        return 'bg-gray-100 text-gray-400 border-gray-200';
       default: return 'bg-gray-100 text-gray-400 border-gray-200';
     }
   };
@@ -196,13 +208,13 @@ export default function ClientSupport() {
                       <div className="flex gap-4 flex-grow">
                         <div className={cn(
                           "w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0",
-                          ticket.status?.toLowerCase() === 'aberto' || ticket.status?.toLowerCase() === 'open' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                          ['aberta', 'new', 'open'].includes((ticket.status || '').toLowerCase()) ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
                         )}>
                           <MessageSquare className="w-6 h-6" />
                         </div>
                         <div className="space-y-2 flex-grow">
                           <div className="flex items-center gap-3">
-                            <span className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">{ticket.reference || ticket.id}</span>
+                            <span className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">{ticket.tracking_code || ticket.id}</span>
                             <span className={cn(
                               "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border",
                               getStatusColor(ticket.status)
@@ -211,7 +223,7 @@ export default function ClientSupport() {
                             </span>
                           </div>
                           <h3 className="text-lg font-bold text-blue-950 line-clamp-1">{ticket.subject || ticket.title || ticket.description}</h3>
-                          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Atualizado em {new Date(ticket.updatedAt || ticket.createdAt).toLocaleDateString()}</p>
+                          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Atualizado em {new Date(ticket.updated_at || ticket.created_at).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-end">
