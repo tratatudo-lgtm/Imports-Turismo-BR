@@ -25,7 +25,10 @@ import {
   AdminClient,
   AdminSale,
   AdminSalesStats,
-  AdminSession
+  AdminSession,
+  AdminTravelOrder,
+  AdminTravelPayment,
+  AdminTravelStats
 } from '../types';
 
 const PUBLIC_API_BASE_URL = 'https://api.tratatudo.pt/api/public';
@@ -160,6 +163,59 @@ export const apiService = {
       avgTicket: 0, 
       monthlyRevenue: 0 
     }),
+
+  // Admin Travel Module
+  getAdminTravelOrders: () =>
+    privateFetcher<any>('/admin/travel/orders').then(res => res.orders || []),
+
+  getAdminTravelOrderDetail: (id: string) =>
+    privateFetcher<any>(`/admin/travel/orders/${id}`).then(res => res.order || res),
+
+  createAdminTravelOrder: (data: any) =>
+    privateFetcher<any>('/admin/travel/orders', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+
+  updateAdminTravelOrder: (id: string, data: any) =>
+    privateFetcher<any>(`/admin/travel/orders/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    }),
+
+  getAdminTravelPayments: () =>
+    privateFetcher<any>('/admin/travel/payments').then(res => res.payments || []),
+
+  getAdminTravelPaymentDetail: (id: string) =>
+    privateFetcher<any>(`/admin/travel/payments/${id}`).then(res => res.payment || res),
+
+  createAdminTravelPayment: (data: any) =>
+    privateFetcher<any>('/admin/travel/payments', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+
+  updateAdminTravelPayment: (id: string, data: any) =>
+    privateFetcher<any>(`/admin/travel/payments/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    }),
+
+  getAdminTravelStats: () =>
+    privateFetcher<any>('/admin/travel/stats').then(res => res.stats || {
+      totalOrders: 0,
+      awaitingPaymentOrders: 0,
+      confirmedOrders: 0,
+      paidPayments: 0,
+      totalPaidAmount: 0,
+      totalDueAmount: 0
+    }),
+
+  getAdminClientTravelOrders: (id: string) =>
+    privateFetcher<any>(`/admin/clients/${id}/travel-orders`).then(res => res.orders || []),
+
+  getAdminClientTravelPayments: (id: string) =>
+    privateFetcher<any>(`/admin/clients/${id}/travel-payments`).then(res => res.payments || []),
 
   updateTicketStatus: (id: string, status: string) =>
     privateFetcher<any>(`/admin/tickets/${id}/status`, {

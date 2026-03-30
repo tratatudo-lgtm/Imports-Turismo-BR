@@ -239,6 +239,72 @@ export interface AdminSession {
   phone_e164?: string;
 }
 
+export interface AdminTravelOrder {
+  id: string;
+  tracking_code: string;
+  order_code: string;
+  client_id: string;
+  customer_name: string;
+  customer_phone_e164: string;
+  customer_email: string;
+  destino: string;
+  origin_city: string;
+  travel_start_date: string;
+  travel_end_date: string;
+  passengers_adults: number;
+  passengers_children: number;
+  package_type: string;
+  total_amount: number;
+  amount_paid: number;
+  amount_due: number;
+  payment_method: string;
+  payment_type: 'single' | 'installments';
+  installments: number;
+  sales_status: string;
+  payment_status: string;
+  notes?: string;
+  metadata?: any;
+  created_at: string;
+  updated_at: string;
+  payments?: AdminTravelPayment[];
+}
+
+export interface AdminTravelPayment {
+  id: string;
+  payment_code: string;
+  external_reference?: string;
+  order_id: string;
+  order_code: string;
+  client_id: string;
+  customer_name: string;
+  amount: number;
+  currency: string;
+  method: string;
+  channel?: string;
+  type: string;
+  installment_number?: number;
+  installment_total?: number;
+  status: string;
+  due_at: string;
+  paid_at?: string;
+  payer_name?: string;
+  payer_phone_e164?: string;
+  payer_email?: string;
+  notes?: string;
+  proof_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminTravelStats {
+  totalOrders: number;
+  awaitingPaymentOrders: number;
+  confirmedOrders: number;
+  paidPayments: number;
+  totalPaidAmount: number;
+  totalDueAmount: number;
+}
+
 export interface ClientSession {
   token: string;
   client: Customer;

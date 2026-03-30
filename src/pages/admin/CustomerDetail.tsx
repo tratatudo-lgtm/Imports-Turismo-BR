@@ -23,7 +23,7 @@ import {
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { apiService } from '../../services/api';
-import { AdminClient } from '../../types';
+import { AdminClient, AdminTravelOrder, AdminTravelPayment } from '../../types';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
@@ -31,17 +31,26 @@ export default function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [customer, setCustomer] = useState<AdminClient | null>(null);
+  const [travelOrders, setTravelOrders] = useState<AdminTravelOrder[]>([]);
+  const [travelPayments, setTravelPayments] = useState<AdminTravelPayment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const adminPhone = localStorage.getItem('admin_phone');
 
   useEffect(() => {
-    const fetchCustomer = async () => {
+    const fetchCustomerData = async () => {
       if (!id) return;
       try {
-        const data = await apiService.getAdminClientDetail(id);
-        setCustomer(data);
+        const [clientData, ordersData, paymentsData] = await Promise.all([
+          apiService.getAdminClientDetail(id),
+          apiService.getAdminClientTravelOrders(id).catch(() => []),
+          apiService.getAdminClientTravelPayments(id).catch(() => [])
+        ]);
+        
+        setCustomer(clientData);
+        setTravelOrders(ordersData);
+        setTravelPayments(paymentsData);
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar detalhes do cliente.');
         if (err.message?.includes('401')) {
@@ -52,7 +61,7 @@ export default function CustomerDetail() {
       }
     };
 
-    fetchCustomer();
+    fetchCustomerData();
   }, [id, navigate]);
 
   const handleLogout = async () => {
@@ -253,9 +262,75 @@ export default function CustomerDetail() {
               </div>
             </Card>
 
-            {/* Associated Items */}
+            {/* Travel Orders */}
             <div className="space-y-6">
-              <h3 className="text-xl font-bold text-blue-950">Pedidos Associados</h3>
+              <h3 className="text-xl font-bold text-blue-950">Pedidos de Viagem</h3>
+              {travelOrders.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {travelOrders.map((order) => (
+                    <Card key={order.id} className="p-6 border-none shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="space-y-1">
+                          <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">{order.order_code || order.tracking_code}</p>
+                          <h4 className="font-bold text-blue-950">{order.destino}</h4>
+                        </div>
+                        <span className={cn(
+                          "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                          order.sales_status === 'confirmed' ? "bg-green-100 text-green-600 border-green-200" : "bg-blue-100 text-blue-600 border-blue-200"
+                        )}>
+                          {order.sales_status}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center pt-4 border-t border-gray-50">
+                        <p className="text-xs text-gray-400">{new Date(order.created_at).toLocaleDateString()}</p>
+                        <Link to={`/admin/travel/orders/${order.id}`} className="text-xs font-bold text-blue-600 hover:underline">Ver Detalhes</Link>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="p-12 text-center text-gray-400 italic border-none shadow-sm">
+                  Nenhum pedido de viagem associado.
+                </Card>
+              )}
+            </div>
+
+            {/* Travel Payments */}
+            <div className="space-y-6">
+              <h3 className="text-xl font-bold text-blue-950">Pagamentos de Viagem</h3>
+              {travelPayments.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {travelPayments.map((payment) => (
+                    <Card key={payment.id} className="p-6 border-none shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="space-y-1">
+                          <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">{payment.payment_code}</p>
+                          <h4 className="font-bold text-blue-950">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.amount)}</h4>
+                        </div>
+                        <span className={cn(
+                          "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                          payment.status === 'paid' ? "bg-green-100 text-green-600 border-green-200" : "bg-amber-100 text-amber-600 border-amber-200"
+                        )}>
+                          {payment.status}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center pt-4 border-t border-gray-50">
+                        <p className="text-xs text-gray-400">Vencimento: {new Date(payment.due_at).toLocaleDateString()}</p>
+                        <Link to={`/admin/travel/payments/${payment.id}`} className="text-xs font-bold text-blue-600 hover:underline">Ver Pagamento</Link>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="p-12 text-center text-gray-400 italic border-none shadow-sm">
+                  Nenhum pagamento associado.
+                </Card>
+              )}
+            </div>
+
+            {/* Legacy Tickets */}
+            <div className="space-y-6">
+              <h3 className="text-xl font-bold text-blue-950">Tickets de Suporte</h3>
               {customer.pedidos && customer.pedidos.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {customer.pedidos.map((pedido) => (
@@ -271,14 +346,14 @@ export default function CustomerDetail() {
                       </div>
                       <div className="flex justify-between items-center pt-4 border-t border-gray-50">
                         <p className="text-xs text-gray-400">{new Date(pedido.created_at || pedido.createdAt || '').toLocaleDateString()}</p>
-                        <Link to={`/admin/pedidos?search=${pedido.tracking_code || pedido.trackingCode}`} className="text-xs font-bold text-blue-600 hover:underline">Ver Pedido</Link>
+                        <Link to={`/admin/pedidos?search=${pedido.tracking_code || pedido.trackingCode}`} className="text-xs font-bold text-blue-600 hover:underline">Ver Ticket</Link>
                       </div>
                     </Card>
                   ))}
                 </div>
               ) : (
                 <Card className="p-12 text-center text-gray-400 italic border-none shadow-sm">
-                  Nenhum pedido associado.
+                  Nenhum ticket associado.
                 </Card>
               )}
             </div>

@@ -24,6 +24,8 @@ import AdminCustomerDetail from './pages/admin/CustomerDetail';
 import AdminOrders from './pages/admin/Orders';
 import AdminComplaints from './pages/admin/Complaints';
 import AdminSales from './pages/admin/Sales';
+import AdminTravelOrderDetail from './pages/admin/TravelOrderDetail';
+import AdminTravelPaymentDetail from './pages/admin/TravelPaymentDetail';
 
 import ClientLogin from './pages/client/Login';
 import MagicLinkCallback from './pages/client/MagicLinkCallback';
@@ -60,6 +62,8 @@ export default function App() {
           <Route path="/admin/pedidos" element={<AdminProtectedRoute><AdminOrders /></AdminProtectedRoute>} />
           <Route path="/admin/reclamacoes" element={<AdminProtectedRoute><AdminComplaints /></AdminProtectedRoute>} />
           <Route path="/admin/vendas" element={<AdminProtectedRoute><AdminSales /></AdminProtectedRoute>} />
+          <Route path="/admin/travel/orders/:id" element={<AdminProtectedRoute><AdminTravelOrderDetail /></AdminProtectedRoute>} />
+          <Route path="/admin/travel/payments/:id" element={<AdminProtectedRoute><AdminTravelPaymentDetail /></AdminProtectedRoute>} />
 
           {/* Client Routes */}
           <Route path="/cliente/login" element={<ClientLogin />} />
