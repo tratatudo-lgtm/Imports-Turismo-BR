@@ -22,14 +22,15 @@ import {
   ClientSession
 } from '../types';
 
-const API_BASE_URL = 'https://api.tratatudo.pt/api/public';
+const PUBLIC_API_BASE_URL = 'https://api.tratatudo.pt/api/public';
+const PRIVATE_API_BASE_URL = 'https://api.tratatudo.pt/api';
 const SITE_KEY = 'imports-turismo-br';
 
-async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const url = new URL(`${API_BASE_URL}${endpoint}`);
+async function baseFetcher<T>(baseUrl: string, endpoint: string, options?: RequestInit, appendSiteKey: boolean = false): Promise<T> {
+  const url = new URL(`${baseUrl}${endpoint}`);
   
-  // For GET requests, append site_key to query params if not already there
-  if (options?.method === 'GET' || !options?.method) {
+  // For GET requests, append site_key to query params if requested
+  if (appendSiteKey && (options?.method === 'GET' || !options?.method)) {
     url.searchParams.append('site_key', SITE_KEY);
   }
 
@@ -55,125 +56,131 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
   return response.json();
 }
 
+const publicFetcher = <T>(endpoint: string, options?: RequestInit) => 
+  baseFetcher<T>(PUBLIC_API_BASE_URL, endpoint, options, true);
+
+const privateFetcher = <T>(endpoint: string, options?: RequestInit) => 
+  baseFetcher<T>(PRIVATE_API_BASE_URL, endpoint, options, false);
+
 export const apiService = {
-  // Public Endpoints
+  // Public Endpoints (using publicFetcher)
   createQuote: (data: any) => 
-    fetcher<{ trackingCode: string }>('/request', { 
+    publicFetcher<{ trackingCode: string }>('/request', { 
       method: 'POST', 
       body: JSON.stringify({ ...data, site_key: SITE_KEY, type: 'orcamento' }) 
     }),
   
   createBooking: (data: any) => 
-    fetcher<{ trackingCode: string }>('/request', { 
+    publicFetcher<{ trackingCode: string }>('/request', { 
       method: 'POST', 
       body: JSON.stringify({ ...data, site_key: SITE_KEY, type: 'reserva' }) 
     }),
   
   createComplaint: (data: any) => 
-    fetcher<any>('/complaint', { 
+    publicFetcher<any>('/complaint', { 
       method: 'POST', 
       body: JSON.stringify({ ...data, site_key: SITE_KEY }) 
     }),
   
   trackRequest: (trackingCode: string) => 
-    fetcher<TrackingResponse>(`/track/${trackingCode}`),
+    publicFetcher<TrackingResponse>(`/track/${trackingCode}`),
 
-  // Chat Endpoints
+  // Chat Endpoints (using publicFetcher)
   startChat: () =>
-    fetcher<{ sessionId: string }>('/chat/start', {
+    publicFetcher<{ sessionId: string }>('/chat/start', {
       method: 'POST',
       body: JSON.stringify({ site_key: SITE_KEY })
     }),
 
   sendChatMessage: (sessionId: string, message: string) =>
-    fetcher<{ reply: string; quick_actions?: { label: string; action: string }[] }>('/chat/message', {
+    publicFetcher<{ reply: string; quick_actions?: { label: string; action: string }[] }>('/chat/message', {
       method: 'POST',
       body: JSON.stringify({ site_key: SITE_KEY, sessionId, message })
     }),
 
-  // Admin Auth
+  // Admin Auth (using privateFetcher)
   requestOtp: (phoneNumber: string) => 
-    fetcher<OtpResponse>('/admin/request-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
+    privateFetcher<OtpResponse>('/admin/request-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
   
   verifyOtp: (phoneNumber: string, otp: string) => 
-    fetcher<VerifyOtpResponse>('/admin/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
+    privateFetcher<VerifyOtpResponse>('/admin/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
 
   // Admin Dashboard (requires token)
   getDashboard: (token: string) => 
-    fetcher<DashboardStats>('/admin/dashboard', { 
+    privateFetcher<DashboardStats>('/admin/dashboard', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
   
   // Admin CRM
   getCRM: (token: string) => 
-    fetcher<Customer[]>('/admin/crm', { 
+    privateFetcher<Customer[]>('/admin/crm', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
   
   getCustomerDetail: (token: string, id: string) => 
-    fetcher<Customer>(`/admin/crm/${id}`, { 
+    privateFetcher<Customer>(`/admin/crm/${id}`, { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
 
   // Admin Orders
   getAdminPedidos: (token: string) => 
-    fetcher<QuoteRequest[]>('/admin/pedidos', { 
+    privateFetcher<QuoteRequest[]>('/admin/pedidos', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
 
   // Admin Complaints
   getAdminReclamacoes: (token: string) => 
-    fetcher<Complaint[]>('/admin/reclamacoes', { 
+    privateFetcher<Complaint[]>('/admin/reclamacoes', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
 
   // Admin Sales
   getAdminVendas: (token: string) => 
-    fetcher<Sale[]>('/admin/vendas', { 
+    privateFetcher<Sale[]>('/admin/vendas', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
 
   // Client Auth
   requestClientOtp: (phoneNumber: string) => 
-    fetcher<OtpResponse>('/client/request-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
+    privateFetcher<OtpResponse>('/client/request-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
   
   verifyClientOtp: (phoneNumber: string, otp: string) => 
-    fetcher<ClientSession>('/client/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
+    privateFetcher<ClientSession>('/client/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
 
   requestMagicLink: (email: string) => 
-    fetcher<MagicLinkResponse>('/client/request-magic-link', { method: 'POST', body: JSON.stringify({ email }) }),
+    privateFetcher<MagicLinkResponse>('/client/request-magic-link', { method: 'POST', body: JSON.stringify({ email }) }),
   
   verifyMagicLink: (token: string) => 
-    fetcher<ClientSession>('/client/verify-magic-link', { method: 'POST', body: JSON.stringify({ token }) }),
+    privateFetcher<ClientSession>('/client/verify-magic-link', { method: 'POST', body: JSON.stringify({ token }) }),
 
   // Client Area (requires token)
   getClientDashboard: (token: string) => 
-    fetcher<ClientDashboardData>('/client/dashboard', { 
+    privateFetcher<ClientDashboardData>('/client/dashboard', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
   
   getClientPurchases: (token: string) => 
-    fetcher<Sale[]>('/client/compras', { 
+    privateFetcher<Sale[]>('/client/compras', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
   
   getClientDocuments: (token: string) => 
-    fetcher<ClientDocument[]>('/client/documentos', { 
+    privateFetcher<ClientDocument[]>('/client/documentos', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
   
   downloadDocument: (token: string, id: string) => 
-    fetcher<Blob>(`/client/documentos/${id}/download`, { 
+    privateFetcher<Blob>(`/client/documentos/${id}/download`, { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
   
   getClientSupport: (token: string) => 
-    fetcher<Complaint[]>('/client/apoio', { 
+    privateFetcher<Complaint[]>('/client/apoio', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
   
   getClientProfile: (token: string) => 
-    fetcher<Customer>('/client/perfil', { 
+    privateFetcher<Customer>('/client/perfil', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
 };
