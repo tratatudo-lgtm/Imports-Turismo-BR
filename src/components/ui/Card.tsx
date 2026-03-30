@@ -11,6 +11,7 @@ interface CardProps {
   className?: string;
   title?: string;
   subtitle?: string;
+  key?: string | number;
 }
 
 export const Card = ({ children, className, title, subtitle }: CardProps) => {

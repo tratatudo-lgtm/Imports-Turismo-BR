@@ -21,10 +21,12 @@ export const Layout = ({ children }: LayoutProps) => {
   }, [pathname]);
 
   const isAdminPage = pathname.startsWith('/admin');
+  const isClientPage = pathname.startsWith('/cliente');
+  const isAuthPage = isAdminPage || isClientPage;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 font-sans selection:bg-blue-100 selection:text-blue-900">
-      {!isAdminPage && <Navbar />}
+      {!isAuthPage && <Navbar />}
       <main className="flex-grow">
         <AnimatePresence mode="wait">
           <motion.div
@@ -38,7 +40,7 @@ export const Layout = ({ children }: LayoutProps) => {
           </motion.div>
         </AnimatePresence>
       </main>
-      {!isAdminPage && <Footer />}
+      {!isAuthPage && <Footer />}
     </div>
   );
 };

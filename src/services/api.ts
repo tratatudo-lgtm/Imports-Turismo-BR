@@ -12,7 +12,14 @@ import {
   DashboardStats,
   TrackingResponse,
   OtpResponse,
-  VerifyOtpResponse
+  VerifyOtpResponse,
+  Customer,
+  Sale,
+  ClientDashboardData,
+  ClientDocument,
+  MagicLinkResponse,
+  Complaint,
+  ClientSession
 } from '../types';
 
 const API_BASE_URL = 'https://api.tratatudo.pt/api/imports-turismo';
@@ -31,11 +38,16 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
     throw new Error(error.message || `Erro HTTP: ${response.status}`);
   }
 
+  // Handle blob responses
+  if (response.headers.get('Content-Type')?.includes('application/octet-stream') || endpoint.includes('download')) {
+    return response.blob() as any;
+  }
+
   return response.json();
 }
 
 export const apiService = {
-  // Public Endpoints
+  // ... (existing public endpoints)
   createLead: (data: Lead) => 
     fetcher<Lead>('/leads', { method: 'POST', body: JSON.stringify(data) }),
   
@@ -67,18 +79,76 @@ export const apiService = {
       headers: { Authorization: `Bearer ${token}` } 
     }),
   
-  getLeads: (token: string) => 
-    fetcher<Lead[]>('/admin/leads', { 
+  // Admin CRM
+  getCRM: (token: string) => 
+    fetcher<Customer[]>('/admin/crm', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
   
-  getPedidos: (token: string) => 
+  getCustomerDetail: (token: string, id: string) => 
+    fetcher<Customer>(`/admin/crm/${id}`, { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+
+  // Admin Orders
+  getAdminPedidos: (token: string) => 
     fetcher<QuoteRequest[]>('/admin/pedidos', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
+
+  // Admin Complaints
+  getAdminReclamacoes: (token: string) => 
+    fetcher<Complaint[]>('/admin/reclamacoes', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+
+  // Admin Sales
+  getAdminVendas: (token: string) => 
+    fetcher<Sale[]>('/admin/vendas', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+
+  // Client Auth
+  requestClientOtp: (phoneNumber: string) => 
+    fetcher<OtpResponse>('/client/request-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
   
-  getReclamacoes: (token: string) => 
-    fetcher<ComplaintRequest[]>('/admin/reclamacoes', { 
+  verifyClientOtp: (phoneNumber: string, otp: string) => 
+    fetcher<ClientSession>('/client/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
+
+  requestMagicLink: (email: string) => 
+    fetcher<MagicLinkResponse>('/client/request-magic-link', { method: 'POST', body: JSON.stringify({ email }) }),
+  
+  verifyMagicLink: (token: string) => 
+    fetcher<ClientSession>('/client/verify-magic-link', { method: 'POST', body: JSON.stringify({ token }) }),
+
+  // Client Area (requires token)
+  getClientDashboard: (token: string) => 
+    fetcher<ClientDashboardData>('/client/dashboard', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+  
+  getClientPurchases: (token: string) => 
+    fetcher<Sale[]>('/client/compras', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+  
+  getClientDocuments: (token: string) => 
+    fetcher<ClientDocument[]>('/client/documentos', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+  
+  downloadDocument: (token: string, id: string) => 
+    fetcher<Blob>(`/client/documentos/${id}/download`, { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+  
+  getClientSupport: (token: string) => 
+    fetcher<Complaint[]>('/client/apoio', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+  
+  getClientProfile: (token: string) => 
+    fetcher<Customer>('/client/perfil', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
 };

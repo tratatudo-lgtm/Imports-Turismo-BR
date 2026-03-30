@@ -68,6 +68,59 @@ export interface ComplaintRequest {
   createdAt?: string;
 }
 
+export interface Sale {
+  id: string;
+  cliente: string;
+  produto: string;
+  valor: number;
+  status: string;
+  createdAt: string;
+}
+
+export interface Complaint {
+  id: string;
+  cliente: string;
+  referencia: string;
+  descricao: string;
+  status: string;
+  data: string;
+}
+
+export interface Customer {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  createdAt: string;
+  notas?: string;
+  historico?: Array<{
+    titulo: string;
+    descricao: string;
+    data: string;
+  }>;
+  pedidos?: QuoteRequest[];
+  reclamacoes?: Complaint[];
+  vendas?: Sale[];
+}
+
+export interface ClientDocument {
+  id: string;
+  nome: string;
+  tipo: string;
+  data: string;
+  url?: string;
+}
+
+export interface ClientDashboardData {
+  resumo: {
+    totalCompras: number;
+    proximaViagem: string;
+    documentosNovos: number;
+  };
+  comprasRecentes: Sale[];
+  documentosRecentes: ClientDocument[];
+}
+
 // API Responses
 export interface TrackingResponse {
   trackingCode: string;
@@ -91,6 +144,10 @@ export interface VerifyOtpResponse {
   token: string;
 }
 
+export interface MagicLinkResponse {
+  message: string;
+}
+
 export interface DashboardStats {
   totalLeads: number;
   totalPedidos: number;
@@ -103,4 +160,9 @@ export interface DashboardStats {
 export interface AdminSession {
   token: string;
   phoneNumber: string;
+}
+
+export interface ClientSession {
+  token: string;
+  client: Customer;
 }

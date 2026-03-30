@@ -90,10 +90,40 @@ export default function AdminDashboard() {
             </div>
             <span className="text-lg font-bold text-blue-950">Admin Panel</span>
           </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <button className="text-sm font-bold text-blue-600 border-b-2 border-blue-600 pb-1">Visão Geral</button>
-            <button className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Relatórios</button>
-            <button className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Configurações</button>
+          <nav className="hidden lg:flex items-center gap-6">
+            <button 
+              onClick={() => navigate('/admin/dashboard')}
+              className={cn(
+                "text-sm font-bold transition-all pb-1 border-b-2",
+                window.location.pathname === '/admin/dashboard' ? "text-blue-600 border-blue-600" : "text-gray-500 border-transparent hover:text-blue-600"
+              )}
+            >
+              Visão Geral
+            </button>
+            <button 
+              onClick={() => navigate('/admin/crm')}
+              className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
+            >
+              CRM
+            </button>
+            <button 
+              onClick={() => navigate('/admin/pedidos')}
+              className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
+            >
+              Pedidos
+            </button>
+            <button 
+              onClick={() => navigate('/admin/reclamacoes')}
+              className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
+            >
+              Reclamações
+            </button>
+            <button 
+              onClick={() => navigate('/admin/vendas')}
+              className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
+            >
+              Vendas
+            </button>
           </nav>
         </div>
         <div className="flex items-center gap-4">
@@ -332,7 +362,16 @@ export default function AdminDashboard() {
                 </table>
               </div>
               <div className="p-4 bg-gray-50/50 border-t border-gray-100 text-center">
-                <button className="text-xs font-bold text-blue-600 hover:underline">Ver todos os registos</button>
+                <button 
+                  onClick={() => {
+                    if (activeTab === 'pedidos') navigate('/admin/pedidos');
+                    if (activeTab === 'leads') navigate('/admin/crm');
+                    if (activeTab === 'reclamacoes') navigate('/admin/reclamacoes');
+                  }}
+                  className="text-xs font-bold text-blue-600 hover:underline"
+                >
+                  Ver todos os registos
+                </button>
               </div>
             </Card>
           </div>
