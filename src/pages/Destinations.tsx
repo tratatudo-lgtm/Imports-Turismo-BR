@@ -11,12 +11,12 @@ import { Input } from '../components/ui/Input';
 import { motion } from 'motion/react';
 
 const destinations = [
-  { id: 1, name: 'Maldivas', image: 'https://picsum.photos/seed/maldives/800/600', category: 'Internacional', tag: 'Exótico' },
-  { id: 2, name: 'Paris, França', image: 'https://picsum.photos/seed/paris/800/600', category: 'Internacional', tag: 'Cultura' },
-  { id: 3, name: 'Fernando de Noronha', image: 'https://picsum.photos/seed/noronha/800/600', category: 'Nacional', tag: 'Brasil' },
-  { id: 4, name: 'Tóquio, Japão', image: 'https://picsum.photos/seed/tokyo/800/600', category: 'Internacional', tag: 'Tecnologia' },
-  { id: 5, name: 'Gramado, RS', image: 'https://picsum.photos/seed/gramado/800/600', category: 'Nacional', tag: 'Serra' },
-  { id: 6, name: 'Roma, Itália', image: 'https://picsum.photos/seed/rome/800/600', category: 'Internacional', tag: 'História' },
+  { id: 1, name: 'Destino Internacional 1', image: 'https://picsum.photos/seed/dest1/800/600', category: 'Internacional', tag: 'Destaque' },
+  { id: 2, name: 'Destino Internacional 2', image: 'https://picsum.photos/seed/dest2/800/600', category: 'Internacional', tag: 'Cultura' },
+  { id: 3, name: 'Destino Nacional 1', image: 'https://picsum.photos/seed/dest3/800/600', category: 'Nacional', tag: 'Brasil' },
+  { id: 4, name: 'Destino Internacional 3', image: 'https://picsum.photos/seed/dest4/800/600', category: 'Internacional', tag: 'Tecnologia' },
+  { id: 5, name: 'Destino Nacional 2', image: 'https://picsum.photos/seed/dest5/800/600', category: 'Nacional', tag: 'Serra' },
+  { id: 6, name: 'Destino Internacional 4', image: 'https://picsum.photos/seed/dest6/800/600', category: 'Internacional', tag: 'História' },
 ];
 
 export default function Destinations() {

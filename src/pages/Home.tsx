@@ -12,9 +12,9 @@ import { siteConfig } from '../config/site';
 
 export default function Home() {
   const destinations = [
-    { id: 1, name: 'Maldivas', image: 'https://picsum.photos/seed/maldives/800/600', tag: 'Exótico' },
-    { id: 2, name: 'Paris, França', image: 'https://picsum.photos/seed/paris/800/600', tag: 'Cultura' },
-    { id: 3, name: 'Fernando de Noronha', image: 'https://picsum.photos/seed/noronha/800/600', tag: 'Brasil' },
+    { id: 1, name: 'Destino Exclusivo', image: 'https://picsum.photos/seed/travel1/800/600', tag: 'Destaque' },
+    { id: 2, name: 'Experiência Cultural', image: 'https://picsum.photos/seed/travel2/800/600', tag: 'Cultura' },
+    { id: 3, name: 'Paraíso Tropical', image: 'https://picsum.photos/seed/travel3/800/600', tag: 'Lazer' },
   ];
 
   const benefits = [
@@ -194,22 +194,22 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
-                  <p className="text-3xl font-bold text-white">Atendimento</p>
-                  <p className="text-blue-100 text-sm">Personalizado</p>
+                  <p className="text-3xl font-bold text-white">Suporte</p>
+                  <p className="text-blue-100 text-sm">Dedicado</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
-                  <p className="text-3xl font-bold text-white">Destinos</p>
-                  <p className="text-blue-100 text-sm">Globais</p>
+                  <p className="text-3xl font-bold text-white">Experiência</p>
+                  <p className="text-blue-100 text-sm">Personalizada</p>
                 </div>
               </div>
               <div className="space-y-4 mt-8">
                 <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
-                  <p className="text-3xl font-bold text-white">Suporte</p>
-                  <p className="text-blue-100 text-sm">Especializado</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
                   <p className="text-3xl font-bold text-white">Confiança</p>
                   <p className="text-blue-100 text-sm">e Transparência</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                  <p className="text-3xl font-bold text-white">Qualidade</p>
+                  <p className="text-blue-100 text-sm">Garantida</p>
                 </div>
               </div>
             </div>
@@ -242,11 +242,11 @@ export default function Home() {
                     <Star className="w-4 h-4 fill-current" />
                   </div>
                   <p className="text-gray-600 italic mb-6 leading-relaxed">
-                    "Excelente suporte durante toda a viagem. A equipe da {siteConfig.name} foi muito atenciosa e cuidou de todos os detalhes com profissionalismo."
+                    "A equipa demonstrou grande profissionalismo e atenção aos detalhes, garantindo que tudo corresse como planeado."
                   </p>
                   <div>
-                    <p className="font-bold text-blue-950">Cliente {siteConfig.name}</p>
-                    <p className="text-xs text-gray-400 uppercase tracking-widest">Viajou recentemente</p>
+                    <p className="font-bold text-blue-950">Cliente Verificado</p>
+                    <p className="text-xs text-gray-400 uppercase tracking-widest">Feedback Recente</p>
                   </div>
                 </Card>
               </div>

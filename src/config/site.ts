@@ -6,14 +6,14 @@
 export const siteConfig = {
   name: 'Imports Turismo BR',
   companyName: 'Imports Turismo BR',
-  whatsapp: '5511999999999',
-  whatsappFormatted: '+55 (11) 99999-9999',
-  email: 'contato@importsturismo.com.br',
-  supportEmail: 'apoio@importsturismo.com.br',
-  address: 'Av. Paulista, 1000 - São Paulo, SP, Brasil',
+  whatsapp: '', // To be configured
+  whatsappFormatted: '', // To be configured
+  email: '', // To be configured
+  supportEmail: '', // To be configured
+  address: '', // To be configured
   social: {
-    instagram: 'https://instagram.com/importsturismo',
-    facebook: 'https://facebook.com/importsturismo',
-    twitter: 'https://twitter.com/importsturismo',
+    instagram: '#',
+    facebook: '#',
+    twitter: '#',
   }
 };

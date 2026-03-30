@@ -148,7 +148,7 @@ export default function TrackRequest() {
                     </div>
                     <div className="space-y-1">
                       <p className="font-bold text-blue-950">Registada</p>
-                      <p className="text-sm text-gray-500">A solicitação foi registada no sistema.</p>
+                      <p className="text-sm text-gray-500">A solicitação foi recebida e aguarda processamento inicial.</p>
                       {result.createdAt && (
                         <p className="text-xs text-gray-400 mt-2">{new Date(result.createdAt).toLocaleString()}</p>
                       )}
@@ -164,7 +164,7 @@ export default function TrackRequest() {
                     </div>
                     <div className="space-y-1">
                       <p className={cn("font-bold", result.status !== 'pendente' ? "text-blue-950" : "text-gray-300")}>Em Análise</p>
-                      <p className="text-sm text-gray-500">A solicitação está a ser analisada pela equipa técnica.</p>
+                      <p className="text-sm text-gray-500">A equipa técnica está a validar os detalhes da sua solicitação.</p>
                     </div>
                   </div>
 
@@ -177,7 +177,7 @@ export default function TrackRequest() {
                     </div>
                     <div className="space-y-1">
                       <p className={cn("font-bold", result.status === 'concluido' || result.status === 'confirmado' ? "text-blue-950" : "text-gray-300")}>Finalizada</p>
-                      <p className="text-sm text-gray-500">O processo foi concluído.</p>
+                      <p className="text-sm text-gray-500">O processo foi concluído e a informação final está disponível.</p>
                     </div>
                   </div>
                 </div>

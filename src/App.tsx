@@ -20,6 +20,7 @@ import AdminComplaints from './pages/admin/Complaints';
 import AdminSales from './pages/admin/Sales';
 
 import ClientLogin from './pages/client/Login';
+import MagicLinkCallback from './pages/client/MagicLinkCallback';
 import ClientDashboard from './pages/client/Dashboard';
 import ClientPurchases from './pages/client/Purchases';
 import ClientDocuments from './pages/client/Documents';
@@ -50,6 +51,7 @@ export default function App() {
 
           {/* Client Routes */}
           <Route path="/cliente/login" element={<ClientLogin />} />
+          <Route path="/cliente/verify-magic-link" element={<MagicLinkCallback />} />
           <Route path="/cliente/dashboard" element={<ClientDashboard />} />
           <Route path="/cliente/compras" element={<ClientPurchases />} />
           <Route path="/cliente/documentos" element={<ClientDocuments />} />

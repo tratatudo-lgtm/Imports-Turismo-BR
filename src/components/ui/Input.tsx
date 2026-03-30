@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { InputHTMLAttributes, TextareaHTMLAttributes, forwardRef } from 'react';
 import { cn } from '../../lib/utils';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -35,7 +35,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-interface TextAreaProps extends InputHTMLAttributes<HTMLTextAreaElement> {
+interface TextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
 }
@@ -50,13 +50,13 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
           </label>
         )}
         <textarea
-          ref={ref as any}
+          ref={ref}
           className={cn(
             'w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-gray-50 min-h-[100px]',
             error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
             className
           )}
-          {...props as any}
+          {...props}
         />
         {error && <p className="text-xs text-red-500">{error}</p>}
       </div>

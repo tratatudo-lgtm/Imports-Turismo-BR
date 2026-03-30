@@ -177,7 +177,7 @@ export default function CustomerDetail() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Última Atividade</p>
-                    <p className="text-sm font-bold text-blue-950">Hoje</p>
+                    <p className="text-sm font-bold text-blue-950">Sem informação disponível</p>
                   </div>
                 </div>
               </div>

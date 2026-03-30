@@ -25,6 +25,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { apiService } from '../../services/api';
+import { Customer } from '../../types';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
@@ -34,7 +35,7 @@ export default function ClientProfile() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Customer | null>(null);
 
   const token = localStorage.getItem('client_token');
   const clientData = JSON.parse(localStorage.getItem('client_data') || '{}');

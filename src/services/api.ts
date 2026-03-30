@@ -39,8 +39,9 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
   }
 
   // Handle blob responses
-  if (response.headers.get('Content-Type')?.includes('application/octet-stream') || endpoint.includes('download')) {
-    return response.blob() as any;
+  const contentType = response.headers.get('Content-Type');
+  if (contentType?.includes('application/octet-stream') || contentType?.includes('application/pdf') || endpoint.includes('download')) {
+    return response.blob() as unknown as T;
   }
 
   return response.json();

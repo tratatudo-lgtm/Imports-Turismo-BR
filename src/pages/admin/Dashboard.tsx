@@ -172,7 +172,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
-                <span>Aguardando processamento</span>
+                <span>Total de pedidos registados</span>
               </div>
             </Card>
           </motion.div>
@@ -189,7 +189,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
-                <span>Pendentes de resolução</span>
+                <span>Total de reclamações registadas</span>
               </div>
             </Card>
           </motion.div>
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
-                <span>Cálculo em processamento</span>
+                <span>Métrica em análise</span>
               </div>
             </Card>
           </motion.div>
