@@ -22,10 +22,18 @@ import {
   ClientSession
 } from '../types';
 
-const API_BASE_URL = 'https://api.tratatudo.pt/api/imports-turismo';
+const API_BASE_URL = 'https://api.tratatudo.pt/api/public';
+const SITE_KEY = 'imports-turismo-br';
 
 async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const url = new URL(`${API_BASE_URL}${endpoint}`);
+  
+  // For GET requests, append site_key to query params if not already there
+  if (options?.method === 'GET' || !options?.method) {
+    url.searchParams.append('site_key', SITE_KEY);
+  }
+
+  const response = await fetch(url.toString(), {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -48,24 +56,40 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
 }
 
 export const apiService = {
-  // ... (existing public endpoints)
-  createLead: (data: Lead) => 
-    fetcher<Lead>('/leads', { method: 'POST', body: JSON.stringify(data) }),
+  // Public Endpoints
+  createQuote: (data: any) => 
+    fetcher<{ trackingCode: string }>('/request', { 
+      method: 'POST', 
+      body: JSON.stringify({ ...data, site_key: SITE_KEY, type: 'orcamento' }) 
+    }),
   
-  createQuote: (data: QuoteRequest) => 
-    fetcher<{ trackingCode: string }>('/orcamentos', { method: 'POST', body: JSON.stringify(data) }),
+  createBooking: (data: any) => 
+    fetcher<{ trackingCode: string }>('/request', { 
+      method: 'POST', 
+      body: JSON.stringify({ ...data, site_key: SITE_KEY, type: 'reserva' }) 
+    }),
   
-  createBooking: (data: BookingRequest) => 
-    fetcher<{ trackingCode: string }>('/reservas', { method: 'POST', body: JSON.stringify(data) }),
-  
-  createContact: (data: ContactRequest) => 
-    fetcher<ContactRequest>('/contactos', { method: 'POST', body: JSON.stringify(data) }),
-  
-  createComplaint: (data: ComplaintRequest) => 
-    fetcher<ComplaintRequest>('/reclamacoes', { method: 'POST', body: JSON.stringify(data) }),
+  createComplaint: (data: any) => 
+    fetcher<any>('/complaint', { 
+      method: 'POST', 
+      body: JSON.stringify({ ...data, site_key: SITE_KEY }) 
+    }),
   
   trackRequest: (trackingCode: string) => 
-    fetcher<TrackingResponse>(`/pedidos/${trackingCode}`),
+    fetcher<TrackingResponse>(`/track/${trackingCode}`),
+
+  // Chat Endpoints
+  startChat: () =>
+    fetcher<{ sessionId: string }>('/chat/start', {
+      method: 'POST',
+      body: JSON.stringify({ site_key: SITE_KEY })
+    }),
+
+  sendChatMessage: (sessionId: string, message: string) =>
+    fetcher<{ reply: string; quick_actions?: { label: string; action: string }[] }>('/chat/message', {
+      method: 'POST',
+      body: JSON.stringify({ site_key: SITE_KEY, sessionId, message })
+    }),
 
   // Admin Auth
   requestOtp: (phoneNumber: string) => 

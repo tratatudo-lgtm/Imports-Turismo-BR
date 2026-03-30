@@ -10,12 +10,14 @@ import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { Button } from '../ui/Button';
 import { siteConfig } from '../../config/site';
+import { apiService } from '../../services/api';
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  quickActions?: { label: string; action: string }[];
 }
 
 interface ChatWindowProps {
@@ -23,6 +25,7 @@ interface ChatWindowProps {
 }
 
 export const ChatWindow = ({ onClose }: ChatWindowProps) => {
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -42,6 +45,18 @@ export const ChatWindow = ({ onClose }: ChatWindowProps) => {
     scrollToBottom();
   }, [messages, isTyping]);
 
+  useEffect(() => {
+    const initChat = async () => {
+      try {
+        const { sessionId } = await apiService.startChat();
+        setSessionId(sessionId);
+      } catch (error) {
+        console.error('Failed to start chat:', error);
+      }
+    };
+    initChat();
+  }, []);
+
   const handleSendMessage = async (content: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -51,31 +66,44 @@ export const ChatWindow = ({ onClose }: ChatWindowProps) => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    
+    if (!sessionId) return;
+
     setIsTyping(true);
 
     try {
-      // Prepare for real backend integration
-      // const response = await fetch('/api/imports-turismo/chat/message', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ message: content, userId: '...' })
-      // });
-      // const data = await response.json();
+      const { reply, quick_actions } = await apiService.sendChatMessage(sessionId, content);
       
-      // Fallback professional message if API is not yet implemented
-      setTimeout(() => {
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: 'Agradecemos o seu contacto. De momento, os nossos consultores estão a processar vários pedidos. Pode também contactar-nos diretamente via WhatsApp para uma resposta mais rápida.',
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-        setIsTyping(false);
-      }, 1500);
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: reply,
+        timestamp: new Date(),
+        quickActions: quick_actions,
+      };
+      
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Chat error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente ou contacte-nos via WhatsApp.',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
+    }
+  };
+
+  const handleQuickAction = (action: string) => {
+    if (action.startsWith('http')) {
+      window.open(action, '_blank');
+    } else if (action.startsWith('/')) {
+      window.location.href = action;
+    } else {
+      handleSendMessage(action);
     }
   };
 
@@ -112,9 +140,9 @@ export const ChatWindow = ({ onClose }: ChatWindowProps) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-gray-50/50">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gray-50/50">
         {messages.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} />
+          <ChatMessage key={msg.id} message={msg} onQuickAction={handleQuickAction} />
         ))}
         {isTyping && (
           <div className="flex gap-2 p-3 md:p-4 bg-white rounded-2xl rounded-tl-none w-14 md:w-16 shadow-sm border border-gray-100">
@@ -124,42 +152,6 @@ export const ChatWindow = ({ onClose }: ChatWindowProps) => {
           </div>
         )}
         <div ref={messagesEndRef} />
-      </div>
-
-      {/* Quick Actions */}
-      <div className="px-4 md:px-6 py-2 md:py-3 bg-white border-t border-gray-100 flex gap-2 overflow-x-auto no-scrollbar">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="whitespace-nowrap rounded-lg md:rounded-xl bg-blue-50 text-blue-600 border border-blue-100 text-[10px] md:text-xs h-8 md:h-9"
-          onClick={() => window.location.href = '/orcamento'}
-        >
-          Pedir Orçamento
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="whitespace-nowrap rounded-lg md:rounded-xl bg-blue-50 text-blue-600 border border-blue-100 text-[10px] md:text-xs h-8 md:h-9"
-          onClick={() => window.location.href = '/destinos'}
-        >
-          Ver Destinos
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="whitespace-nowrap rounded-lg md:rounded-xl bg-blue-50 text-blue-600 border border-blue-100 text-[10px] md:text-xs h-8 md:h-9"
-          onClick={() => window.location.href = '/apoio'}
-        >
-          Falar com Consultor
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="whitespace-nowrap rounded-lg md:rounded-xl bg-blue-50 text-blue-600 border border-blue-100 text-[10px] md:text-xs h-8 md:h-9"
-          onClick={() => window.location.href = '/acompanhar'}
-        >
-          Acompanhar Pedido
-        </Button>
       </div>
 
       {/* Input */}
