@@ -19,7 +19,12 @@ import {
   ClientDocument,
   MagicLinkResponse,
   Complaint,
-  ClientSession
+  ClientSession,
+  AdminTicket,
+  AdminTicketStats,
+  AdminClient,
+  AdminSale,
+  AdminSalesStats
 } from '../types';
 
 const PUBLIC_API_BASE_URL = 'https://api.tratatudo.pt/api/public';
@@ -102,6 +107,12 @@ export const apiService = {
     }),
 
   // Admin Auth (using privateFetcher)
+  adminLogin: (data: any) =>
+    privateFetcher<{ ok: boolean; message?: string }>('/admin/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+
   requestOtp: (phoneNumber: string) => 
     privateFetcher<OtpResponse>('/auth/send-otp', { 
       method: 'POST', 
@@ -114,13 +125,40 @@ export const apiService = {
       body: JSON.stringify({ phone_e164: phoneNumber, code: otp }) 
     }),
 
-  // Admin Dashboard (requires token)
+  // Admin Dashboard (Session-based)
+  getAdminTickets: () => 
+    privateFetcher<AdminTicket[]>('/admin/tickets'),
+  
+  getAdminTicketStats: () => 
+    privateFetcher<AdminTicketStats>('/admin/tickets/stats'),
+  
+  // Admin CRM
+  getAdminClients: () => 
+    privateFetcher<AdminClient[]>('/admin/clients'),
+  
+  getAdminClientDetail: (id: string) => 
+    privateFetcher<AdminClient>(`/admin/clients/${id}`),
+
+  // Admin Sales
+  getAdminSales: () => 
+    privateFetcher<AdminSale[]>('/admin/sales'),
+
+  getAdminSalesStats: () => 
+    privateFetcher<AdminSalesStats>('/admin/sales/stats'),
+
+  updateTicketStatus: (id: string, status: string) =>
+    privateFetcher<any>(`/admin/tickets/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status })
+    }),
+
+  // Legacy Admin Dashboard (requires token) - Keep for compatibility if needed, but we'll use new ones
   getDashboard: (token?: string) => 
     privateFetcher<DashboardStats>('/admin/dashboard', { 
       headers: token ? { Authorization: `Bearer ${token}` } : {} 
     }),
   
-  // Admin CRM
+  // Legacy Admin CRM
   getCRM: (token?: string) => 
     privateFetcher<Customer[]>('/admin/crm', { 
       headers: token ? { Authorization: `Bearer ${token}` } : {} 
@@ -131,19 +169,19 @@ export const apiService = {
       headers: token ? { Authorization: `Bearer ${token}` } : {} 
     }),
 
-  // Admin Orders
+  // Legacy Admin Orders
   getAdminPedidos: (token?: string) => 
     privateFetcher<QuoteRequest[]>('/admin/pedidos', { 
       headers: token ? { Authorization: `Bearer ${token}` } : {} 
     }),
 
-  // Admin Complaints
+  // Legacy Admin Complaints
   getAdminReclamacoes: (token?: string) => 
     privateFetcher<Complaint[]>('/admin/reclamacoes', { 
       headers: token ? { Authorization: `Bearer ${token}` } : {} 
     }),
 
-  // Admin Sales
+  // Legacy Admin Sales
   getAdminVendas: (token?: string) => 
     privateFetcher<Sale[]>('/admin/vendas', { 
       headers: token ? { Authorization: `Bearer ${token}` } : {} 

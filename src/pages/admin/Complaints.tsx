@@ -22,34 +22,33 @@ import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { apiService } from '../../services/api';
-import { Complaint } from '../../types';
+import { AdminTicket } from '../../types';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
 export default function AdminComplaints() {
   const navigate = useNavigate();
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [complaints, setComplaints] = useState<AdminTicket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const token = localStorage.getItem('admin_token');
-  const phone = localStorage.getItem('admin_phone');
+  const adminEmail = localStorage.getItem('admin_email');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/admin/login');
-      return;
-    }
-
     const fetchComplaints = async () => {
       try {
-        const data = await apiService.getAdminReclamacoes(token);
-        setComplaints(data);
+        const data = await apiService.getAdminTickets();
+        // Filter for complaints
+        const isComplaint = (t: AdminTicket) => {
+          const kind = (t.kind || '').toLowerCase();
+          const category = (t.category || '').toLowerCase();
+          return kind.includes('reclam') || category.includes('reclam') || category.includes('pos_venda');
+        };
+        setComplaints(data.filter(t => isComplaint(t)));
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar reclamações.');
         if (err.message?.includes('401')) {
-          localStorage.removeItem('admin_token');
           navigate('/admin/login');
         }
       } finally {
@@ -58,18 +57,17 @@ export default function AdminComplaints() {
     };
 
     fetchComplaints();
-  }, [token, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_phone');
+    localStorage.removeItem('admin_email');
     navigate('/admin/login');
   };
 
   const filteredComplaints = complaints.filter(c => 
-    c.cliente.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.referencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+    c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.trackingCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (c.subject || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusColor = (status: string) => {
@@ -114,7 +112,7 @@ export default function AdminComplaints() {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <p className="text-sm font-bold text-blue-950">Consultor Autorizado</p>
-            <p className="text-xs text-gray-400">{phone}</p>
+            <p className="text-xs text-gray-400">{adminEmail}</p>
           </div>
           <button 
             onClick={handleLogout}
@@ -165,28 +163,28 @@ export default function AdminComplaints() {
                   <div className="flex gap-4 flex-grow">
                     <div className={cn(
                       "w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0",
-                      complaint.status === 'Aberta' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                      ['new', 'open', 'aberto', 'pendente'].includes((complaint.status || '').toLowerCase()) ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
                     )}>
                       <MessageSquare className="w-6 h-6" />
                     </div>
                     <div className="space-y-2 flex-grow">
                       <div className="flex items-center gap-3">
-                        <span className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">{complaint.referencia}</span>
+                        <span className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">{complaint.trackingCode}</span>
                         <span className={cn(
                           "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border",
-                          getStatusColor(complaint.status)
+                          getStatusColor(complaint.status || 'pendente')
                         )}>
-                          {complaint.status}
+                          {complaint.status || 'pendente'}
                         </span>
                       </div>
-                      <h3 className="text-lg font-bold text-blue-950">{complaint.cliente}</h3>
-                      <p className="text-sm text-gray-500 line-clamp-2 max-w-2xl">{complaint.descricao}</p>
+                      <h3 className="text-lg font-bold text-blue-950">{complaint.nome}</h3>
+                      <p className="text-sm text-gray-500 line-clamp-2 max-w-2xl">{complaint.subject || complaint.destino}</p>
                     </div>
                   </div>
                   <div className="flex flex-row md:flex-col justify-between md:items-end gap-4 min-w-[140px]">
                     <div className="text-right">
                       <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Data</p>
-                      <p className="text-sm font-medium text-blue-950">{new Date(complaint.data).toLocaleDateString()}</p>
+                      <p className="text-sm font-medium text-blue-950">{new Date(complaint.createdAt || '').toLocaleDateString()}</p>
                     </div>
                     <div className="relative group inline-block">
                       <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">

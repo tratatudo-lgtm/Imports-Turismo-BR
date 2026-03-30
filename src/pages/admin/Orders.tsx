@@ -23,35 +23,34 @@ import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { apiService } from '../../services/api';
-import { QuoteRequest } from '../../types';
+import { AdminTicket } from '../../types';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
 export default function AdminOrders() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [orders, setOrders] = useState<QuoteRequest[]>([]);
+  const [orders, setOrders] = useState<AdminTicket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
 
-  const token = localStorage.getItem('admin_token');
-  const phone = localStorage.getItem('admin_phone');
+  const adminEmail = localStorage.getItem('admin_email');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/admin/login');
-      return;
-    }
-
     const fetchOrders = async () => {
       try {
-        const data = await apiService.getAdminPedidos(token);
-        setOrders(data);
+        const data = await apiService.getAdminTickets();
+        // Filter out complaints
+        const isComplaint = (t: AdminTicket) => {
+          const kind = (t.kind || '').toLowerCase();
+          const category = (t.category || '').toLowerCase();
+          return kind.includes('reclam') || category.includes('reclam') || category.includes('pos_venda');
+        };
+        setOrders(data.filter(t => !isComplaint(t)));
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar dados dos pedidos.');
         if (err.message?.includes('401')) {
-          localStorage.removeItem('admin_token');
           navigate('/admin/login');
         }
       } finally {
@@ -60,11 +59,10 @@ export default function AdminOrders() {
     };
 
     fetchOrders();
-  }, [token, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_phone');
+    localStorage.removeItem('admin_email');
     navigate('/admin/login');
   };
 
@@ -117,7 +115,7 @@ export default function AdminOrders() {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <p className="text-sm font-bold text-blue-950">Consultor Autorizado</p>
-            <p className="text-xs text-gray-400">{phone}</p>
+            <p className="text-xs text-gray-400">{adminEmail}</p>
           </div>
           <button 
             onClick={handleLogout}

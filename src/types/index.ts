@@ -121,6 +121,52 @@ export interface ClientDashboardData {
   documentosRecentes: ClientDocument[];
 }
 
+export interface AdminTicket {
+  id: string;
+  trackingCode: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  destino: string;
+  status: string;
+  kind: string;
+  category: string;
+  createdAt: string;
+  subject?: string;
+  description?: string;
+}
+
+export interface AdminTicketStats {
+  activeTickets: number;
+  complaints: number;
+  totalTickets: number;
+}
+
+export interface AdminSalesStats {
+  totalSales: number;
+  totalRevenue: number;
+  averageTicket: number;
+}
+
+export interface AdminSale {
+  id: string;
+  clientName: string;
+  productName: string;
+  amount: number;
+  status: string;
+  createdAt: string;
+}
+
+export interface AdminClient {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  createdAt: string;
+  totalTickets?: number;
+  totalSpent?: number;
+}
+
 // API Responses
 export interface TrackingResponse {
   trackingCode: string;

@@ -25,44 +25,38 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { apiService } from '../../services/api';
-import { QuoteRequest, Complaint, Customer } from '../../types';
+import { AdminTicket, AdminTicketStats, AdminClient } from '../../types';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState<QuoteRequest[]>([]);
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [tickets, setTickets] = useState<AdminTicket[]>([]);
+  const [stats, setStats] = useState<AdminTicketStats | null>(null);
+  const [clients, setClients] = useState<AdminClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'leads' | 'pedidos' | 'reclamacoes'>('pedidos');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const token = localStorage.getItem('admin_token');
-  const phone = localStorage.getItem('admin_phone');
+  const adminEmail = localStorage.getItem('admin_email');
+  const activeStatuses = ['pendente', 'em_processamento', 'aguardando_pagamento', 'novo'];
 
   useEffect(() => {
-    if (!token) {
-      navigate('/admin/login');
-      return;
-    }
-
     const fetchData = async () => {
       try {
-        const [pedidosRes, reclamacoesRes, crmRes] = await Promise.all([
-          apiService.getAdminPedidos(token).catch(() => []),
-          apiService.getAdminReclamacoes(token).catch(() => []),
-          apiService.getCRM(token).catch(() => [])
+        const [ticketsRes, statsRes, clientsRes] = await Promise.all([
+          apiService.getAdminTickets().catch(() => []),
+          apiService.getAdminTicketStats().catch(() => ({ activeTickets: 0, complaints: 0, totalTickets: 0 })),
+          apiService.getAdminClients().catch(() => [])
         ]);
 
-        setOrders(pedidosRes);
-        setComplaints(reclamacoesRes);
-        setCustomers(crmRes);
+        setTickets(ticketsRes);
+        setStats(statsRes);
+        setClients(clientsRes);
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar dados do dashboard.');
         if (err.message?.includes('401')) {
-          localStorage.removeItem('admin_token');
           navigate('/admin/login');
         }
       } finally {
@@ -71,39 +65,36 @@ export default function AdminDashboard() {
     };
 
     fetchData();
-  }, [token, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_phone');
+    localStorage.removeItem('admin_email');
     navigate('/admin/login');
   };
 
-  // Calculate metrics based on real data
-  const totalTickets = orders.length + complaints.length;
-  
-  const activeStatuses = ['new', 'open', 'aberto', 'pendente', 'recebido', 'em análise', 'em_analise', 'in_progress'];
-  const activeRequests = orders.filter(o => 
-    activeStatuses.includes((o.status || '').toLowerCase())
-  ).length;
+  const isComplaint = (t: AdminTicket) => {
+    const kind = (t.kind || '').toLowerCase();
+    const category = (t.category || '').toLowerCase();
+    return kind.includes('reclam') || category.includes('reclam') || category.includes('pos_venda');
+  };
 
-  const totalComplaints = complaints.length;
-  const totalLeads = customers.length; // Using CRM as leads source
+  const ordersList = tickets.filter(t => !isComplaint(t));
+  const complaintsList = tickets.filter(t => isComplaint(t));
 
-  const filteredOrders = orders.filter(o => 
+  const filteredOrders = ordersList.filter(o => 
     o.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
     (o.trackingCode && o.trackingCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
     o.destino.toLowerCase().includes(searchTerm.toLowerCase())
   ).slice(0, 10);
 
-  const filteredCustomers = customers.filter(c => 
+  const filteredClients = clients.filter(c => 
     c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
     c.email.toLowerCase().includes(searchTerm.toLowerCase())
   ).slice(0, 10);
 
-  const filteredComplaints = complaints.filter(c => 
-    c.cliente.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.referencia.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredComplaints = complaintsList.filter(c => 
+    c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.trackingCode.toLowerCase().includes(searchTerm.toLowerCase())
   ).slice(0, 10);
 
   if (isLoading) {
@@ -167,7 +158,7 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <p className="text-sm font-bold text-blue-950">Consultor Autorizado</p>
-            <p className="text-xs text-gray-400">{phone}</p>
+            <p className="text-xs text-gray-400">{adminEmail}</p>
           </div>
           <button 
             onClick={handleLogout}
@@ -186,7 +177,7 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total de Leads</p>
-                  <h3 className="text-3xl font-bold text-blue-950">{totalLeads}</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">{clients.length}</h3>
                 </div>
                 <div className="bg-blue-50 p-3 rounded-2xl">
                   <Users className="text-blue-600 w-6 h-6" />
@@ -203,14 +194,14 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Pedidos Ativos</p>
-                  <h3 className="text-3xl font-bold text-blue-950">{activeRequests}</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">{stats?.activeTickets || 0}</h3>
                 </div>
                 <div className="bg-amber-50 p-3 rounded-2xl">
                   <ShoppingBag className="text-amber-600 w-6 h-6" />
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
-                <span>Total: {orders.length}</span>
+                <span>Total: {ordersList.length}</span>
               </div>
             </Card>
           </motion.div>
@@ -220,7 +211,7 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Reclamações</p>
-                  <h3 className="text-3xl font-bold text-blue-950">{totalComplaints}</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">{stats?.complaints || 0}</h3>
                 </div>
                 <div className="bg-red-50 p-3 rounded-2xl">
                   <AlertTriangle className="text-red-600 w-6 h-6" />
@@ -237,7 +228,7 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total Tickets</p>
-                  <h3 className="text-3xl font-bold text-blue-950">{totalTickets}</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">{stats?.totalTickets || 0}</h3>
                 </div>
                 <div className="bg-green-50 p-3 rounded-2xl">
                   <CheckCircle2 className="text-green-600 w-6 h-6" />
@@ -358,7 +349,7 @@ export default function AdminDashboard() {
                       )
                     )}
                     {activeTab === 'leads' && (
-                      filteredCustomers.length > 0 ? filteredCustomers.map((customer, i) => (
+                      filteredClients.length > 0 ? filteredClients.map((customer, i) => (
                         <tr key={i} className="hover:bg-gray-50/50 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
@@ -407,27 +398,27 @@ export default function AdminDashboard() {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold">
-                                {reclamacao.cliente.charAt(0)}
+                                {reclamacao.nome.charAt(0)}
                               </div>
                               <div>
-                                <p className="text-sm font-bold text-blue-950">{reclamacao.cliente}</p>
-                                <p className="text-xs text-gray-400">{reclamacao.referencia}</p>
+                                <p className="text-sm font-bold text-blue-950">{reclamacao.nome}</p>
+                                <p className="text-xs text-gray-400">{reclamacao.trackingCode}</p>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <p className="text-sm font-medium text-gray-600 truncate max-w-xs">{reclamacao.descricao}</p>
+                            <p className="text-sm font-medium text-gray-600 truncate max-w-xs">{reclamacao.subject || reclamacao.destino}</p>
                           </td>
                           <td className="px-6 py-4">
                             <span className={cn(
                               "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                              reclamacao.status === 'aberta' ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
+                              activeStatuses.includes((reclamacao.status || '').toLowerCase()) ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
                             )}>
                               {reclamacao.status || 'pendente'}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-xs text-gray-400">
-                            {new Date(reclamacao.data || '').toLocaleDateString()}
+                            {new Date(reclamacao.createdAt || '').toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="relative group inline-block">
@@ -479,8 +470,8 @@ export default function AdminDashboard() {
                   <h4 className="font-bold">Seu Perfil</h4>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs text-blue-100/60 uppercase tracking-widest font-bold">Telefone de Acesso</p>
-                  <p className="text-lg font-bold">{phone}</p>
+                  <p className="text-xs text-blue-100/60 uppercase tracking-widest font-bold">Email de Acesso</p>
+                  <p className="text-lg font-bold">{adminEmail}</p>
                 </div>
                 <div className="pt-4 border-t border-white/10">
                   <p className="text-xs text-blue-100/60 leading-relaxed">

@@ -23,35 +23,28 @@ import {
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { apiService } from '../../services/api';
-import { Customer } from '../../types';
+import { AdminClient } from '../../types';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
 export default function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [customer, setCustomer] = useState<AdminClient | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const token = localStorage.getItem('admin_token');
-  const phone = localStorage.getItem('admin_phone');
+  const adminEmail = localStorage.getItem('admin_email');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/admin/login');
-      return;
-    }
-
     const fetchCustomer = async () => {
       if (!id) return;
       try {
-        const data = await apiService.getCustomerDetail(token, id);
+        const data = await apiService.getAdminClientDetail(id);
         setCustomer(data);
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar detalhes do cliente.');
         if (err.message?.includes('401')) {
-          localStorage.removeItem('admin_token');
           navigate('/admin/login');
         }
       } finally {
@@ -60,11 +53,10 @@ export default function CustomerDetail() {
     };
 
     fetchCustomer();
-  }, [token, id, navigate]);
+  }, [id, navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_phone');
+    localStorage.removeItem('admin_email');
     navigate('/admin/login');
   };
 
@@ -117,7 +109,7 @@ export default function CustomerDetail() {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <p className="text-sm font-bold text-blue-950">Consultor Autorizado</p>
-            <p className="text-xs text-gray-400">{phone}</p>
+            <p className="text-xs text-gray-400">{adminEmail}</p>
           </div>
           <button 
             onClick={handleLogout}

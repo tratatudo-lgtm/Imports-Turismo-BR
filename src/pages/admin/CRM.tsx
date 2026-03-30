@@ -21,34 +21,27 @@ import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { apiService } from '../../services/api';
-import { Customer } from '../../types';
+import { AdminClient } from '../../types';
 import { motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 
 export default function CRM() {
   const navigate = useNavigate();
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customers, setCustomers] = useState<AdminClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const token = localStorage.getItem('admin_token');
-  const phone = localStorage.getItem('admin_phone');
+  const adminEmail = localStorage.getItem('admin_email');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/admin/login');
-      return;
-    }
-
     const fetchCRM = async () => {
       try {
-        const data = await apiService.getCRM(token);
+        const data = await apiService.getAdminClients();
         setCustomers(data);
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar dados do CRM.');
         if (err.message?.includes('401')) {
-          localStorage.removeItem('admin_token');
           navigate('/admin/login');
         }
       } finally {
@@ -57,11 +50,10 @@ export default function CRM() {
     };
 
     fetchCRM();
-  }, [token, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_phone');
+    localStorage.removeItem('admin_email');
     navigate('/admin/login');
   };
 
@@ -103,7 +95,7 @@ export default function CRM() {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <p className="text-sm font-bold text-blue-950">Consultor Autorizado</p>
-            <p className="text-xs text-gray-400">{phone}</p>
+            <p className="text-xs text-gray-400">{adminEmail}</p>
           </div>
           <button 
             onClick={handleLogout}
