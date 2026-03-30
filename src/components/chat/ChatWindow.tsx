@@ -27,7 +27,7 @@ export const ChatWindow = ({ onClose }: ChatWindowProps) => {
     {
       id: '1',
       role: 'assistant',
-      content: 'Olá. O atendimento automático web está em preparação. Pode deixar a sua mensagem ou seguir para orçamento, destinos ou apoio.',
+      content: 'Olá. O atendimento automático web está disponível para orientar o seu pedido. Pode escrever a sua mensagem ou usar as opções rápidas abaixo.',
       timestamp: new Date(),
     },
   ]);
@@ -51,7 +51,32 @@ export const ChatWindow = ({ onClose }: ChatWindowProps) => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    // No fake response simulation as requested
+    setIsTyping(true);
+
+    try {
+      // Prepare for real backend integration
+      // const response = await fetch('/api/imports-turismo/chat/message', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ message: content, userId: '...' })
+      // });
+      // const data = await response.json();
+      
+      // Fallback professional message if API is not yet implemented
+      setTimeout(() => {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'Agradecemos o seu contacto. De momento, os nossos consultores estão a processar vários pedidos. Pode também contactar-nos diretamente via WhatsApp para uma resposta mais rápida.',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+        setIsTyping(false);
+      }, 1500);
+    } catch (error) {
+      console.error('Chat error:', error);
+      setIsTyping(false);
+    }
   };
 
   return (

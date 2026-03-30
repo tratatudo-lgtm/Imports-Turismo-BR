@@ -50,33 +50,33 @@ export default function Contacts() {
           ))}
         </div>
 
-        <div className="bg-blue-950 rounded-[3rem] p-12 md:p-20 overflow-hidden relative">
+        <div className="bg-blue-950 rounded-[2rem] md:rounded-[3rem] p-8 md:p-20 overflow-hidden relative">
           <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 -skew-x-12 translate-x-1/4" />
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <h2 className="text-4xl font-bold text-white tracking-tighter leading-tight">Envie-nos uma mensagem direta</h2>
-              <p className="text-blue-100/60 text-lg leading-relaxed">Se preferir, preencha o formulário e a nossa equipa entrará em contacto consigo o mais brevemente possível.</p>
-              <div className="space-y-4">
+            <div className="space-y-6 md:space-y-8 text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tighter leading-tight">Envie-nos uma mensagem direta</h2>
+              <p className="text-blue-100/60 text-base md:text-lg leading-relaxed">Se preferir, preencha o formulário e a nossa equipa entrará em contacto consigo o mais brevemente possível.</p>
+              <div className="space-y-4 flex flex-col items-center md:items-start">
                 <div className="flex items-center gap-4 text-white/80">
-                  <Globe className="w-6 h-6 text-amber-500" />
-                  <span>Atendimento em Português e Inglês</span>
+                  <Globe className="w-5 h-5 md:w-6 md:h-6 text-amber-500" />
+                  <span className="text-sm md:text-base">Atendimento em Português e Inglês</span>
                 </div>
                 <div className="flex items-center gap-4 text-white/80">
-                  <Phone className="w-6 h-6 text-amber-500" />
-                  <span>Suporte 24/7 para clientes em viagem</span>
+                  <Phone className="w-5 h-5 md:w-6 md:h-6 text-amber-500" />
+                  <span className="text-sm md:text-base">Suporte 24/7 para clientes em viagem</span>
                 </div>
               </div>
             </div>
             
-            <Card className="p-6 md:p-8 space-y-6 bg-white/10 backdrop-blur-xl border-white/10">
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <input type="text" placeholder="Nome" className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500 w-full" />
-                  <input type="email" placeholder="E-mail" className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500 w-full" />
+            <Card className="p-5 md:p-8 space-y-4 md:space-y-6 bg-white/10 backdrop-blur-xl border-white/10">
+              <div className="space-y-3 md:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                  <input type="text" placeholder="Nome" className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500 w-full text-sm" />
+                  <input type="email" placeholder="E-mail" className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500 w-full text-sm" />
                 </div>
-                <input type="text" placeholder="Assunto" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500" />
-                <textarea placeholder="Mensagem" rows={4} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none" />
-                <Button className="w-full h-14 text-lg font-bold rounded-xl">Enviar Mensagem</Button>
+                <input type="text" placeholder="Assunto" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm" />
+                <textarea placeholder="Mensagem" rows={4} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none text-sm" />
+                <Button className="w-full h-12 md:h-14 text-base md:text-lg font-bold rounded-xl">Enviar Mensagem</Button>
               </div>
             </Card>
           </div>

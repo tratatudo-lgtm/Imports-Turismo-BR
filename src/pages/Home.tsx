@@ -52,11 +52,11 @@ export default function Home() {
             >
               Sua Próxima Aventura Começa Aqui
             </motion.span>
-            <h1 className="text-4xl md:text-8xl font-black text-white tracking-tighter leading-[1.1] md:leading-[0.9] drop-shadow-2xl">
+            <h1 className="text-3xl md:text-8xl font-black text-white tracking-tighter leading-[1.1] md:leading-[0.9] drop-shadow-2xl">
               Explore o Mundo com <br className="hidden md:block"/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Exclusividade</span>
             </h1>
-            <p className="text-base md:text-2xl text-blue-100/60 max-w-3xl mx-auto font-medium leading-relaxed tracking-tight px-4 md:px-0">
+            <p className="text-sm md:text-2xl text-blue-100/60 max-w-3xl mx-auto font-medium leading-relaxed tracking-tight px-4 md:px-0">
               Atendimento personalizado para transformar seus sonhos de viagem em memórias inesquecíveis. Do Brasil para o mundo, cuidamos de cada detalhe.
             </p>
           </motion.div>
@@ -184,11 +184,11 @@ export default function Home() {
           <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 -skew-x-12 translate-x-1/4" />
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 md:space-y-8 text-center md:text-left">
-              <h2 className="text-3xl md:text-5xl font-bold text-white leading-tight">
+              <h2 className="text-2xl md:text-5xl font-bold text-white leading-tight">
                 Sua próxima viagem <br className="hidden md:block"/>
                 <span className="text-amber-400">começa com a gente.</span>
               </h2>
-              <p className="text-blue-50 text-base md:text-lg font-light leading-relaxed">
+              <p className="text-blue-50 text-sm md:text-lg font-light leading-relaxed">
                 Nossa equipe está preparada para desenhar cada detalhe da sua experiência. Fale conosco agora e receba um atendimento dedicado.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
@@ -208,25 +208,25 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
-                  <p className="text-2xl md:text-3xl font-bold text-white">Suporte</p>
-                  <p className="text-blue-100 text-xs md:text-sm">Dedicado</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+              <div className="space-y-3 md:space-y-4">
+                <div className="bg-white/10 backdrop-blur-md p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
+                  <p className="text-xl md:text-3xl font-bold text-white">Suporte</p>
+                  <p className="text-blue-100 text-[10px] md:text-sm uppercase tracking-widest">Dedicado</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
-                  <p className="text-2xl md:text-3xl font-bold text-white">Experiência</p>
-                  <p className="text-blue-100 text-xs md:text-sm">Personalizada</p>
+                <div className="bg-white/10 backdrop-blur-md p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
+                  <p className="text-xl md:text-3xl font-bold text-white">Experiência</p>
+                  <p className="text-blue-100 text-[10px] md:text-sm uppercase tracking-widest">Personalizada</p>
                 </div>
               </div>
-              <div className="space-y-4 md:mt-8">
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
-                  <p className="text-2xl md:text-3xl font-bold text-white">Confiança</p>
-                  <p className="text-blue-100 text-xs md:text-sm">e Transparência</p>
+              <div className="space-y-3 md:space-y-4 md:mt-8">
+                <div className="bg-white/10 backdrop-blur-md p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
+                  <p className="text-xl md:text-3xl font-bold text-white">Confiança</p>
+                  <p className="text-blue-100 text-[10px] md:text-sm uppercase tracking-widest">e Transparência</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
-                  <p className="text-2xl md:text-3xl font-bold text-white">Qualidade</p>
-                  <p className="text-blue-100 text-xs md:text-sm">Garantida</p>
+                <div className="bg-white/10 backdrop-blur-md p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
+                  <p className="text-xl md:text-3xl font-bold text-white">Qualidade</p>
+                  <p className="text-blue-100 text-[10px] md:text-sm uppercase tracking-widest">Garantida</p>
                 </div>
               </div>
             </div>
@@ -237,9 +237,9 @@ export default function Home() {
       {/* Testimonials - Neutralized */}
       <section className="bg-gray-50 py-24 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto space-y-16">
-          <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold text-blue-950 tracking-tight">Compromisso com a Excelência</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Trabalhamos para que cada cliente tenha uma experiência memorável e segura em todos os destinos.</p>
+          <div className="text-center space-y-4 px-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-blue-950 tracking-tight">Compromisso com a Excelência</h2>
+            <p className="text-gray-500 text-sm md:text-base max-w-xl mx-auto">Trabalhamos para que cada cliente tenha uma experiência memorável e segura em todos os destinos.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
