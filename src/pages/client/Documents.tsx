@@ -41,12 +41,12 @@ import { cn } from '../../lib/utils';
 export default function ClientDocuments() {
   const navigate = useNavigate();
   const [documents, setDocuments] = useState<ClientDocument[]>([]);
+  const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const token = localStorage.getItem('client_token');
-  const clientData = JSON.parse(localStorage.getItem('client_data') || '{}');
 
   useEffect(() => {
     if (!token) {
@@ -54,10 +54,15 @@ export default function ClientDocuments() {
       return;
     }
 
-    const fetchDocuments = async () => {
+    const fetchData = async () => {
       try {
-        const data = await apiService.getClientDocuments(token);
-        setDocuments(data);
+        const [docsData, sessionData] = await Promise.all([
+          apiService.getClientDocuments(token),
+          apiService.getSession(token).catch(() => null)
+        ]);
+        
+        setDocuments(docsData);
+        setSession(sessionData);
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar os seus documentos.');
         if (err.message?.includes('401')) {
@@ -70,7 +75,7 @@ export default function ClientDocuments() {
       }
     };
 
-    fetchDocuments();
+    fetchData();
   }, [token, navigate]);
 
   const handleLogout = () => {
@@ -129,7 +134,7 @@ export default function ClientDocuments() {
             <div className="bg-blue-600 p-1.5 rounded-lg">
               <TrendingUp className="text-white w-5 h-5" />
             </div>
-            <span className="text-lg font-bold text-blue-950">Imports Turismo BR</span>
+            <span className="text-lg font-bold text-blue-950">{session?.company_name || 'Imports Turismo BR'}</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/cliente/dashboard" className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Dashboard</Link>
@@ -141,11 +146,11 @@ export default function ClientDocuments() {
         <div className="flex items-center gap-4">
           <Link to="/cliente/perfil" className="flex items-center gap-3 pl-4 border-l border-gray-100">
             <div className="hidden sm:flex flex-col items-end">
-              <p className="text-sm font-bold text-blue-950">{clientData.nome || 'Cliente'}</p>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ver Perfil</p>
+              <p className="text-sm font-bold text-blue-950 leading-none">{session?.name || 'Cliente'}</p>
+              <p className="text-[10px] text-blue-600 font-bold uppercase tracking-tighter leading-none mt-1">{session?.role || 'Ver Perfil'}</p>
             </div>
             <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold border-2 border-white shadow-sm">
-              {clientData.nome?.charAt(0) || <User className="w-5 h-5" />}
+              {session?.name?.charAt(0) || <User className="w-5 h-5" />}
             </div>
           </Link>
           <button 

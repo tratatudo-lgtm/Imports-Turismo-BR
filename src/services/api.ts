@@ -159,6 +159,11 @@ export const apiService = {
       body: JSON.stringify({ phone_e164: phoneNumber, code: otp }) 
     }),
 
+  getSession: (token: string) => 
+    privateFetcher<any>('/auth/session', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+
   requestMagicLink: (email: string) => 
     privateFetcher<MagicLinkResponse>('/auth/request-magic-link', { method: 'POST', body: JSON.stringify({ email }) }),
   
@@ -168,6 +173,31 @@ export const apiService = {
   // Client Area (requires token)
   getClientDashboard: (token: string) => 
     privateFetcher<ClientDashboardData>('/client/dashboard', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+
+  getClientDashboardStats: (token: string) => 
+    privateFetcher<any>('/client/dashboard/stats', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+
+  getClientTickets: (token: string) => 
+    privateFetcher<any[]>('/client/tickets', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+
+  getTicketDetail: (token: string, id: string) => 
+    privateFetcher<any>(`/client/tickets/${id}`, { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+
+  getTicketMessages: (token: string, id: string) => 
+    privateFetcher<any[]>(`/client/tickets/${id}/messages`, { 
+      headers: { Authorization: `Bearer ${token}` } 
+    }),
+
+  getTicketHistory: (token: string, id: string) => 
+    privateFetcher<any[]>(`/client/tickets/${id}/history`, { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
   

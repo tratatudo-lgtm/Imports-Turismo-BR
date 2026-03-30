@@ -36,9 +36,9 @@ export default function ClientProfile() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [profile, setProfile] = useState<Customer | null>(null);
+  const [session, setSession] = useState<any>(null);
 
   const token = localStorage.getItem('client_token');
-  const clientData = JSON.parse(localStorage.getItem('client_data') || '{}');
 
   useEffect(() => {
     if (!token) {
@@ -46,10 +46,15 @@ export default function ClientProfile() {
       return;
     }
 
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       try {
-        const data = await apiService.getClientProfile(token);
-        setProfile(data);
+        const [profileData, sessionData] = await Promise.all([
+          apiService.getClientProfile(token),
+          apiService.getSession(token).catch(() => null)
+        ]);
+        
+        setProfile(profileData);
+        setSession(sessionData);
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar o seu perfil.');
         if (err.message?.includes('401')) {
@@ -62,7 +67,7 @@ export default function ClientProfile() {
       }
     };
 
-    fetchProfile();
+    fetchData();
   }, [token, navigate]);
 
   const handleLogout = () => {
@@ -108,7 +113,7 @@ export default function ClientProfile() {
             <div className="bg-blue-600 p-1.5 rounded-lg">
               <TrendingUp className="text-white w-5 h-5" />
             </div>
-            <span className="text-lg font-bold text-blue-950">Imports Turismo BR</span>
+            <span className="text-lg font-bold text-blue-950">{session?.company_name || 'Imports Turismo BR'}</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/cliente/dashboard" className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Dashboard</Link>
@@ -118,6 +123,10 @@ export default function ClientProfile() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
+          <div className="hidden sm:flex flex-col items-end mr-2">
+            <span className="text-sm font-bold text-blue-950 leading-none">{session?.name || profile?.nome}</span>
+            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-tighter leading-none mt-1">{session?.role || 'Cliente'}</span>
+          </div>
           <button 
             onClick={handleLogout}
             className="p-2.5 bg-gray-50 text-gray-400 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all"

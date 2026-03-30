@@ -38,13 +38,13 @@ import { cn } from '../../lib/utils';
 
 export default function ClientSupport() {
   const navigate = useNavigate();
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [session, setSession] = useState<any>(null);
 
   const token = localStorage.getItem('client_token');
-  const clientData = JSON.parse(localStorage.getItem('client_data') || '{}');
 
   useEffect(() => {
     if (!token) {
@@ -54,14 +54,19 @@ export default function ClientSupport() {
 
     const fetchSupport = async () => {
       try {
-        const data = await apiService.getClientSupport(token);
-        setComplaints(data);
+        const [sessionData, ticketsData] = await Promise.all([
+          apiService.getSession(token).catch(() => null),
+          apiService.getClientTickets(token)
+        ]);
+        setSession(sessionData);
+        setTickets(ticketsData || []);
       } catch (err: any) {
-        setError(err.message || 'Erro ao carregar os seus pedidos de apoio.');
         if (err.message?.includes('401')) {
           localStorage.removeItem('client_token');
           localStorage.removeItem('client_data');
           navigate('/cliente/login');
+        } else {
+          setError(err.message || 'Erro ao carregar os seus pedidos de apoio.');
         }
       } finally {
         setIsLoading(false);
@@ -77,11 +82,18 @@ export default function ClientSupport() {
     navigate('/cliente/login');
   };
 
-  const filteredComplaints = complaints.filter(c => 
-    c.referencia.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTickets = tickets.filter(t => {
+    const isComplaint = ['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.kind?.toLowerCase()) ||
+                       ['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.category?.toLowerCase());
+    
+    if (!isComplaint) return false;
+
+    const matchesSearch = (t.reference || t.id || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         (t.subject || t.title || t.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (t.status || '').toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return matchesSearch;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -124,11 +136,11 @@ export default function ClientSupport() {
         <div className="flex items-center gap-4">
           <Link to="/cliente/perfil" className="flex items-center gap-3 pl-4 border-l border-gray-100">
             <div className="hidden sm:flex flex-col items-end">
-              <p className="text-sm font-bold text-blue-950">{clientData.nome || 'Cliente'}</p>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ver Perfil</p>
+              <p className="text-sm font-bold text-blue-950">{session?.company_name || session?.name || 'Cliente'}</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{session?.role || 'Acesso Cliente'}</p>
             </div>
             <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold border-2 border-white shadow-sm">
-              {clientData.nome?.charAt(0) || <User className="w-5 h-5" />}
+              {(session?.company_name || session?.name || 'C').charAt(0)}
             </div>
           </Link>
           <button 
@@ -168,7 +180,7 @@ export default function ClientSupport() {
               <div className="bg-red-50 border border-red-100 p-6 rounded-2xl text-red-600 font-medium">
                 {error}
               </div>
-            ) : filteredComplaints.length === 0 ? (
+            ) : filteredTickets.length === 0 ? (
               <EmptyState 
                 icon={<MessageSquare className="w-10 h-10" />}
                 title="Sem pedidos de apoio"
@@ -176,28 +188,28 @@ export default function ClientSupport() {
               />
             ) : (
               <div className="space-y-4">
-                {filteredComplaints.map((complaint) => (
-                  <Card key={complaint.id} className="p-6 border-none shadow-sm hover:shadow-md transition-all group">
+                {filteredTickets.map((ticket) => (
+                  <Card key={ticket.id} className="p-6 border-none shadow-sm hover:shadow-md transition-all group">
                     <div className="flex flex-col sm:flex-row justify-between gap-6">
                       <div className="flex gap-4 flex-grow">
                         <div className={cn(
                           "w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0",
-                          complaint.status === 'Aberta' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                          ticket.status?.toLowerCase() === 'aberto' || ticket.status?.toLowerCase() === 'open' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
                         )}>
                           <MessageSquare className="w-6 h-6" />
                         </div>
                         <div className="space-y-2 flex-grow">
                           <div className="flex items-center gap-3">
-                            <span className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">{complaint.referencia}</span>
+                            <span className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">{ticket.reference || ticket.id}</span>
                             <span className={cn(
                               "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border",
-                              getStatusColor(complaint.status)
+                              getStatusColor(ticket.status)
                             )}>
-                              {complaint.status}
+                              {ticket.status}
                             </span>
                           </div>
-                          <h3 className="text-lg font-bold text-blue-950 line-clamp-1">{complaint.descricao}</h3>
-                          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Atualizado em {new Date(complaint.data).toLocaleDateString()}</p>
+                          <h3 className="text-lg font-bold text-blue-950 line-clamp-1">{ticket.subject || ticket.title || ticket.description}</h3>
+                          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Atualizado em {new Date(ticket.updatedAt || ticket.createdAt).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-end">

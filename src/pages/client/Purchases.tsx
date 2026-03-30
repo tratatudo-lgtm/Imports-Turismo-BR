@@ -35,13 +35,13 @@ import { cn } from '../../lib/utils';
 
 export default function ClientPurchases() {
   const navigate = useNavigate();
-  const [purchases, setPurchases] = useState<Sale[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [session, setSession] = useState<any>(null);
 
   const token = localStorage.getItem('client_token');
-  const clientData = JSON.parse(localStorage.getItem('client_data') || '{}');
 
   useEffect(() => {
     if (!token) {
@@ -51,14 +51,19 @@ export default function ClientPurchases() {
 
     const fetchPurchases = async () => {
       try {
-        const data = await apiService.getClientPurchases(token);
-        setPurchases(data);
+        const [sessionData, ticketsData] = await Promise.all([
+          apiService.getSession(token).catch(() => null),
+          apiService.getClientTickets(token)
+        ]);
+        setSession(sessionData);
+        setTickets(ticketsData || []);
       } catch (err: any) {
-        setError(err.message || 'Erro ao carregar as suas compras.');
         if (err.message?.includes('401')) {
           localStorage.removeItem('client_token');
           localStorage.removeItem('client_data');
           navigate('/cliente/login');
+        } else {
+          setError(err.message || 'Erro ao carregar as suas compras.');
         }
       } finally {
         setIsLoading(false);
@@ -74,10 +79,19 @@ export default function ClientPurchases() {
     navigate('/cliente/login');
   };
 
-  const filteredPurchases = purchases.filter(p => 
-    p.produto.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTickets = tickets.filter(t => {
+    // Filter for orders (not complaints)
+    const isComplaint = ['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.kind?.toLowerCase()) ||
+                       ['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.category?.toLowerCase());
+    
+    if (isComplaint) return false;
+
+    const matchesSearch = (t.reference || t.id || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         (t.subject || t.title || t.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (t.status || '').toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return matchesSearch;
+  });
 
   if (isLoading) {
     return (
@@ -110,11 +124,11 @@ export default function ClientPurchases() {
         <div className="flex items-center gap-4">
           <Link to="/cliente/perfil" className="flex items-center gap-3 pl-4 border-l border-gray-100">
             <div className="hidden sm:flex flex-col items-end">
-              <p className="text-sm font-bold text-blue-950">{clientData.nome || 'Cliente'}</p>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ver Perfil</p>
+              <p className="text-sm font-bold text-blue-950">{session?.company_name || session?.name || 'Cliente'}</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{session?.role || 'Acesso Cliente'}</p>
             </div>
             <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold border-2 border-white shadow-sm">
-              {clientData.nome?.charAt(0) || <User className="w-5 h-5" />}
+              {(session?.company_name || session?.name || 'C').charAt(0)}
             </div>
           </Link>
           <button 
@@ -152,7 +166,7 @@ export default function ClientPurchases() {
           <div className="bg-red-50 border border-red-100 p-6 rounded-2xl text-red-600 font-medium">
             {error}
           </div>
-        ) : filteredPurchases.length === 0 ? (
+        ) : filteredTickets.length === 0 ? (
           <EmptyState 
             icon={<ShoppingBag className="w-10 h-10" />}
             title="Nenhuma compra encontrada"
@@ -161,8 +175,8 @@ export default function ClientPurchases() {
           />
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {filteredPurchases.map((purchase) => (
-              <Card key={purchase.id} className="p-8 border-none shadow-sm hover:shadow-md transition-all group">
+            {filteredTickets.map((ticket) => (
+              <Card key={ticket.id} className="p-8 border-none shadow-sm hover:shadow-md transition-all group">
                 <div className="flex flex-col md:flex-row justify-between gap-8">
                   <div className="flex gap-6 flex-grow">
                     <div className="w-20 h-20 rounded-[2rem] bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-50 transition-colors flex-shrink-0">
@@ -170,36 +184,36 @@ export default function ClientPurchases() {
                     </div>
                     <div className="space-y-4 flex-grow">
                       <div className="flex items-center gap-3">
-                        <span className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">{purchase.id}</span>
+                        <span className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">{ticket.reference || ticket.id}</span>
                         <span className={cn(
                           "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                          purchase.status === 'Pago' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                          ticket.status === 'Pago' || ticket.status === 'Concluído' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-blue-50 text-blue-600 border-blue-100'
                         )}>
-                          {purchase.status}
+                          {ticket.status}
                         </span>
                       </div>
-                      <h3 className="text-2xl font-black text-blue-950 tracking-tight">{purchase.produto}</h3>
+                      <h3 className="text-2xl font-black text-blue-950 tracking-tight">{ticket.subject || ticket.title || 'Pedido de Viagem'}</h3>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
                         <div className="flex items-center gap-2 text-gray-500">
                           <Calendar className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm font-medium">{new Date(purchase.data).toLocaleDateString()}</span>
+                          <span className="text-sm font-medium">{new Date(ticket.createdAt || ticket.updatedAt).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-500">
                           <CreditCard className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm font-bold text-blue-950">R$ {purchase.valor.toLocaleString()}</span>
+                          <span className="text-sm font-bold text-blue-950">{ticket.value ? `R$ ${ticket.value.toLocaleString()}` : 'Sob consulta'}</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-500">
                           <MapPin className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm font-medium">Brasil / Mundo</span>
+                          <span className="text-sm font-medium">{ticket.destination || 'Brasil / Mundo'}</span>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div className="flex flex-row md:flex-col justify-between md:items-end gap-4 min-w-[160px] border-t md:border-t-0 md:border-l border-gray-50 pt-6 md:pt-0 md:pl-8">
                     <div className="text-right hidden md:block">
-                      <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Total Pago</p>
-                      <p className="text-xl font-black text-blue-950">R$ {purchase.valor.toLocaleString()}</p>
+                      <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Estado</p>
+                      <p className="text-xl font-black text-blue-950">{ticket.status}</p>
                     </div>
                     <Button variant="outline" className="w-full md:w-auto rounded-xl group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all">
                       Ver Detalhes <ChevronRight className="w-4 h-4 ml-1" />

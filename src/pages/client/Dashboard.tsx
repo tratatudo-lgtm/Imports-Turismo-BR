@@ -31,12 +31,13 @@ import { cn } from '../../lib/utils';
 
 export default function ClientDashboard() {
   const navigate = useNavigate();
-  const [data, setData] = useState<ClientDashboardData | null>(null);
+  const [stats, setStats] = useState<any>(null);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const token = localStorage.getItem('client_token');
-  const clientData = JSON.parse(localStorage.getItem('client_data') || '{}');
 
   useEffect(() => {
     if (!token) {
@@ -44,24 +45,48 @@ export default function ClientDashboard() {
       return;
     }
 
-    const fetchDashboard = async () => {
+    const fetchData = async () => {
       try {
-        const dashboardData = await apiService.getClientDashboard(token);
-        setData(dashboardData);
+        const [sessionData, statsData, ticketsData] = await Promise.all([
+          apiService.getSession(token).catch(() => null),
+          apiService.getClientDashboardStats(token).catch(() => null),
+          apiService.getClientTickets(token).catch(() => [])
+        ]);
+
+        setSession(sessionData);
+        setStats(statsData);
+        setTickets(ticketsData || []);
+        
+        if (sessionData) {
+          localStorage.setItem('client_data', JSON.stringify(sessionData));
+        }
       } catch (err: any) {
-        setError(err.message || 'Erro ao carregar dashboard.');
+        // Only show error if it's a real failure, not just empty data
         if (err.message?.includes('401')) {
           localStorage.removeItem('client_token');
           localStorage.removeItem('client_data');
           navigate('/cliente/login');
+        } else {
+          setError(err.message || 'Erro ao carregar dados do painel.');
         }
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchDashboard();
+    fetchData();
   }, [token, navigate]);
+
+  const activeTickets = tickets.filter(t => 
+    ['aberto', 'pendente', 'em_analise', 'open', 'pending', 'in_analysis'].includes(t.status?.toLowerCase()) &&
+    !['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.kind?.toLowerCase()) &&
+    !['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.category?.toLowerCase())
+  );
+
+  const complaints = tickets.filter(t => 
+    ['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.kind?.toLowerCase()) ||
+    ['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.category?.toLowerCase())
+  );
 
   const handleLogout = () => {
     localStorage.removeItem('client_token');
@@ -121,11 +146,11 @@ export default function ClientDashboard() {
           </button>
           <Link to="/cliente/perfil" className="flex items-center gap-3 pl-4 border-l border-gray-100">
             <div className="hidden sm:flex flex-col items-end">
-              <p className="text-sm font-bold text-blue-950">{clientData.nome || 'Cliente'}</p>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ver Perfil</p>
+              <p className="text-sm font-bold text-blue-950">{session?.company_name || session?.name || 'Cliente'}</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{session?.role || 'Acesso Cliente'}</p>
             </div>
             <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold border-2 border-white shadow-sm">
-              {clientData.nome?.charAt(0) || <User className="w-5 h-5" />}
+              {(session?.company_name || session?.name || 'C').charAt(0)}
             </div>
           </Link>
           <button 
@@ -141,29 +166,26 @@ export default function ClientDashboard() {
         {/* Welcome Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-1">
-            <h1 className="text-3xl font-black text-blue-950 tracking-tight">Olá, {clientData.nome?.split(' ')[0]}!</h1>
+            <h1 className="text-3xl font-black text-blue-950 tracking-tight">Olá, {(session?.company_name || session?.name || 'Cliente').split(' ')[0]}!</h1>
             <p className="text-gray-500">Bem-vindo à sua área de gestão de viagens.</p>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-full text-xs font-bold uppercase tracking-widest border border-green-100">
-            <CheckCircle2 className="w-4 h-4" /> Conta Verificada
+            <CheckCircle2 className="w-4 h-4" /> {session?.authenticated ? 'Sessão Ativa' : 'Conta Verificada'}
           </div>
         </div>
 
         {/* Quick Stats / Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="p-6 border-none shadow-sm space-y-4 bg-white hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
               <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
-                <ShoppingBag className="w-6 h-6" />
+                <TrendingUp className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total de Compras</p>
-                <p className="text-2xl font-bold text-blue-950">{data?.resumo.totalCompras || 0}</p>
+                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total de Leads</p>
+                <p className="text-2xl font-bold text-blue-950">{stats?.totalLeads ?? stats?.leads_count ?? '—'}</p>
               </div>
             </div>
-            <Link to="/cliente/compras" className="flex items-center text-xs font-bold text-blue-600 hover:underline">
-              Ver histórico completo <ArrowRight className="w-3 h-3 ml-1" />
-            </Link>
           </Card>
           <Card className="p-6 border-none shadow-sm space-y-4 bg-white hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
@@ -171,44 +193,49 @@ export default function ClientDashboard() {
                 <Clock className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Próxima Viagem</p>
-                <p className="text-2xl font-bold text-blue-950">{data?.resumo.proximaViagem || 'Nenhuma'}</p>
+                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Pedidos Ativos</p>
+                <p className="text-2xl font-bold text-blue-950">{activeTickets.length}</p>
               </div>
             </div>
-            <Link to="/cliente/compras" className="flex items-center text-xs font-bold text-blue-600 hover:underline">
-              Ver detalhes da reserva <ArrowRight className="w-3 h-3 ml-1" />
-            </Link>
+          </Card>
+          <Card className="p-6 border-none shadow-sm space-y-4 bg-white hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4">
+              <div className="bg-red-50 p-3 rounded-2xl text-red-600">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Reclamações</p>
+                <p className="text-2xl font-bold text-blue-950">{complaints.length}</p>
+              </div>
+            </div>
           </Card>
           <Card className="p-6 border-none shadow-sm space-y-4 bg-white hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
               <div className="bg-green-50 p-3 rounded-2xl text-green-600">
-                <FileText className="w-6 h-6" />
+                <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Documentos Novos</p>
-                <p className="text-2xl font-bold text-blue-950">{data?.resumo.documentosNovos || 0}</p>
+                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Taxa de Conversão</p>
+                <p className="text-2xl font-bold text-blue-950">{stats?.conversionRate ?? 'Em análise'}</p>
               </div>
             </div>
-            <Link to="/cliente/documentos" className="flex items-center text-xs font-bold text-blue-600 hover:underline">
-              Aceder aos documentos <ArrowRight className="w-3 h-3 ml-1" />
-            </Link>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Purchases */}
+          {/* Recent Activity */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-blue-950">Compras Recentes</h2>
+              <h2 className="text-xl font-bold text-blue-950">Pedidos Recentes</h2>
               <Link to="/cliente/compras">
-                <Button variant="ghost" size="sm" className="text-blue-600 font-bold">Ver Todas</Button>
+                <Button variant="ghost" size="sm" className="text-blue-600 font-bold">Ver Todos</Button>
               </Link>
             </div>
             
-            {data?.comprasRecentes && data.comprasRecentes.length > 0 ? (
+            {activeTickets.length > 0 ? (
               <div className="space-y-4">
-                {data.comprasRecentes.map((compra) => (
-                  <Card key={compra.id} className="p-6 border-none shadow-sm hover:shadow-md transition-all group">
+                {activeTickets.slice(0, 5).map((ticket) => (
+                  <Card key={ticket.id} className="p-6 border-none shadow-sm hover:shadow-md transition-all group">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
                         <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-50 transition-colors">
@@ -216,19 +243,19 @@ export default function ClientDashboard() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{compra.id}</span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{ticket.reference || ticket.id}</span>
                             <span className={cn(
                               "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border",
-                              compra.status === 'Confirmado' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                              ticket.status === 'Concluído' || ticket.status === 'Resolvido' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-blue-50 text-blue-600 border-blue-100'
                             )}>
-                              {compra.status}
+                              {ticket.status}
                             </span>
                           </div>
-                          <h3 className="font-bold text-blue-950">{compra.destino}</h3>
-                          <p className="text-sm text-gray-500">{compra.produto} • {new Date(compra.data).toLocaleDateString()}</p>
+                          <h3 className="font-bold text-blue-950">{ticket.subject || ticket.title || 'Pedido de Viagem'}</h3>
+                          <p className="text-sm text-gray-500">{ticket.category || 'Geral'} • {new Date(ticket.createdAt || ticket.updatedAt).toLocaleDateString()}</p>
                         </div>
                       </div>
-                      <Link to="/cliente/compras">
+                      <Link to={`/cliente/apoio`}>
                         <Button variant="ghost" size="sm" className="text-gray-400 group-hover:text-blue-600">
                           <ChevronRight className="w-5 h-5" />
                         </Button>
@@ -240,8 +267,8 @@ export default function ClientDashboard() {
             ) : (
               <EmptyState 
                 icon={<ShoppingBag className="w-10 h-10" />}
-                title="Sem compras recentes"
-                description="Ainda não realizou nenhuma reserva ou compra connosco."
+                title="Sem pedidos recentes"
+                description="Ainda não realizou nenhuma reserva ou orçamento connosco."
                 action={<Button onClick={() => navigate('/destinos')}>Explorar Destinos</Button>}
               />
             )}
@@ -257,30 +284,27 @@ export default function ClientDashboard() {
                 </Link>
               </div>
               <Card className="p-6 border-none shadow-sm space-y-4">
-                {data?.documentosRecentes && data.documentosRecentes.length > 0 ? (
+                {tickets && tickets.length > 0 ? (
                   <div className="space-y-4">
-                    {data.documentosRecentes.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between group">
+                    {tickets.slice(0, 3).map((ticket) => (
+                      <div key={ticket.id} className="flex items-center justify-between group">
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-gray-50 rounded-lg text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                             <FileText className="w-4 h-4" />
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-blue-950 line-clamp-1">{doc.nome}</p>
-                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">{doc.tipo}</p>
+                            <p className="text-sm font-bold text-blue-950 line-clamp-1">{ticket.subject || ticket.title}</p>
+                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">{ticket.status}</p>
                           </div>
                         </div>
-                        <button 
-                          onClick={() => handleDownload(doc.id, doc.nome)}
-                          className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                        >
-                          <Download className="w-4 h-4" />
-                        </button>
+                        <Link to="/cliente/apoio" className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-sm text-gray-400 italic py-4">Nenhum documento disponível.</p>
+                  <p className="text-center text-sm text-gray-400 italic py-4">Nenhum documento ou ticket recente.</p>
                 )}
               </Card>
             </div>
