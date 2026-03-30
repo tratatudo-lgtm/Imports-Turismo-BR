@@ -48,7 +48,7 @@ export default function AdminLogin() {
       const { token } = await apiService.verifyOtp(phoneNumber, otp);
       localStorage.setItem('admin_token', token);
       localStorage.setItem('admin_phone', phoneNumber);
-      navigate('/cliente/dashboard');
+      navigate('/admin/dashboard');
     } catch (err: any) {
       setError(err.message || 'Código inválido. Tente novamente.');
     } finally {
