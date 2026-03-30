@@ -41,20 +41,20 @@ export default function ClientProfile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [profileData, sessionData] = await Promise.all([
+        const [profileRes, sessionRes] = await Promise.all([
           apiService.getClientProfile(),
           apiService.getSession().catch(() => null)
         ]);
         
-        if (!sessionData) {
+        if (!sessionRes || !sessionRes.authenticated) {
           navigate('/cliente/login');
           return;
         }
 
-        setProfile(profileData);
-        setSession(sessionData);
+        setProfile(profileRes?.profile || profileRes);
+        setSession(sessionRes);
         
-        localStorage.setItem('client_data', JSON.stringify(sessionData));
+        localStorage.setItem('client_data', JSON.stringify(sessionRes));
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar o seu perfil.');
         if (err.message?.includes('401')) {

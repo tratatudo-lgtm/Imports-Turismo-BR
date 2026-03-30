@@ -173,10 +173,10 @@ export const apiService = {
 
   // Client Area (Session-based)
   getClientDashboardStats: () => 
-    privateFetcher<any>('/client/dashboard/stats'),
+    privateFetcher<{ ok: boolean; stats: any }>('/client/dashboard/stats'),
 
   getClientTickets: () => 
-    privateFetcher<any[]>('/client/tickets'),
+    privateFetcher<{ ok: boolean; tickets: any[] }>('/client/tickets'),
 
   getTicketDetail: (id: string) => 
     privateFetcher<any>(`/client/tickets/${id}`),
@@ -191,14 +191,14 @@ export const apiService = {
     privateFetcher<Sale[]>('/client/compras'),
   
   getClientDocuments: () => 
-    privateFetcher<ClientDocument[]>('/client/documentos'),
+    privateFetcher<{ ok: boolean; documents: ClientDocument[] }>('/client/documentos'),
   
   downloadDocument: (id: string) => 
     privateFetcher<Blob>(`/client/documentos/${id}/download`),
   
   getClientSupport: () => 
-    privateFetcher<Complaint[]>('/client/apoio'),
+    privateFetcher<{ ok: boolean; tickets: Complaint[] }>('/client/apoio'),
   
   getClientProfile: () => 
-    privateFetcher<Customer>('/client/perfil'),
+    privateFetcher<{ ok: boolean; profile: Customer }>('/client/perfil'),
 };

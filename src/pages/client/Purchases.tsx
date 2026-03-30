@@ -44,20 +44,20 @@ export default function ClientPurchases() {
   useEffect(() => {
     const fetchPurchases = async () => {
       try {
-        const [sessionData, ticketsData] = await Promise.all([
+        const [sessionRes, ticketsRes] = await Promise.all([
           apiService.getSession().catch(() => null),
-          apiService.getClientTickets().catch(() => [])
+          apiService.getClientTickets().catch(() => ({ tickets: [] }))
         ]);
 
-        if (!sessionData) {
+        if (!sessionRes || !sessionRes.authenticated) {
           navigate('/cliente/login');
           return;
         }
 
-        setSession(sessionData);
-        setTickets(ticketsData || []);
+        setSession(sessionRes);
+        setTickets(ticketsRes?.tickets || []);
         
-        localStorage.setItem('client_data', JSON.stringify(sessionData));
+        localStorage.setItem('client_data', JSON.stringify(sessionRes));
       } catch (err: any) {
         if (err.message?.includes('401')) {
           localStorage.removeItem('client_token');
@@ -82,8 +82,9 @@ export default function ClientPurchases() {
 
   const filteredTickets = tickets.filter(t => {
     // Filter for orders (not complaints)
-    const isComplaint = ['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.kind?.toLowerCase()) ||
-                       ['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.category?.toLowerCase());
+    const kind = (t.kind || '').toLowerCase();
+    const category = (t.category || '').toLowerCase();
+    const isComplaint = kind.includes('reclam') || category.includes('pos_venda') || category.includes('reclam');
     
     if (isComplaint) return false;
 

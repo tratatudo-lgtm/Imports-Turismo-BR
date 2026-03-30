@@ -49,20 +49,20 @@ export default function ClientDocuments() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [docsData, sessionData] = await Promise.all([
+        const [docsRes, sessionRes] = await Promise.all([
           apiService.getClientDocuments(),
           apiService.getSession().catch(() => null)
         ]);
         
-        if (!sessionData) {
+        if (!sessionRes || !sessionRes.authenticated) {
           navigate('/cliente/login');
           return;
         }
 
-        setDocuments(docsData);
-        setSession(sessionData);
+        setDocuments(docsRes?.documents || docsRes || []);
+        setSession(sessionRes);
         
-        localStorage.setItem('client_data', JSON.stringify(sessionData));
+        localStorage.setItem('client_data', JSON.stringify(sessionRes));
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar os seus documentos.');
         if (err.message?.includes('401')) {

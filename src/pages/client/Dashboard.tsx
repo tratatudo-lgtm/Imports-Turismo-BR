@@ -40,22 +40,22 @@ export default function ClientDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [sessionData, statsData, ticketsData] = await Promise.all([
+        const [sessionRes, statsRes, ticketsRes] = await Promise.all([
           apiService.getSession().catch(() => null),
           apiService.getClientDashboardStats().catch(() => null),
-          apiService.getClientTickets().catch(() => [])
+          apiService.getClientTickets().catch(() => ({ tickets: [] }))
         ]);
 
-        if (!sessionData) {
+        if (!sessionRes || !sessionRes.authenticated) {
           navigate('/cliente/login');
           return;
         }
 
-        setSession(sessionData);
-        setStats(statsData);
-        setTickets(ticketsData || []);
+        setSession(sessionRes);
+        setStats(statsRes?.stats || null);
+        setTickets(ticketsRes?.tickets || []);
         
-        localStorage.setItem('client_data', JSON.stringify(sessionData));
+        localStorage.setItem('client_data', JSON.stringify(sessionRes));
       } catch (err: any) {
         // Only show error if it's a real failure, not just empty data
         if (err.message?.includes('401')) {
@@ -73,16 +73,23 @@ export default function ClientDashboard() {
     fetchData();
   }, [navigate]);
 
-  const activeTickets = tickets.filter(t => 
-    ['aberto', 'pendente', 'em_analise', 'open', 'pending', 'in_analysis'].includes(t.status?.toLowerCase()) &&
-    !['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.kind?.toLowerCase()) &&
-    !['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.category?.toLowerCase())
-  );
+  const activeTickets = tickets.filter(t => {
+    const status = (t.status || '').toLowerCase();
+    const activeStatuses = ['new', 'open', 'aberto', 'pendente', 'recebido', 'em análise', 'em_analise', 'in_progress'];
+    const isActive = activeStatuses.some(s => status.includes(s));
+    
+    const kind = (t.kind || '').toLowerCase();
+    const category = (t.category || '').toLowerCase();
+    const isComplaint = kind.includes('reclam') || category.includes('pos_venda') || category.includes('reclam');
+    
+    return isActive && !isComplaint;
+  });
 
-  const complaints = tickets.filter(t => 
-    ['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.kind?.toLowerCase()) ||
-    ['reclamacao', 'pos_venda', 'complaint', 'after_sales'].includes(t.category?.toLowerCase())
-  );
+  const complaints = tickets.filter(t => {
+    const kind = (t.kind || '').toLowerCase();
+    const category = (t.category || '').toLowerCase();
+    return kind.includes('reclam') || category.includes('pos_venda') || category.includes('reclam');
+  });
 
   const handleLogout = () => {
     localStorage.removeItem('client_token');
