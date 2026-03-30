@@ -74,8 +74,20 @@ const publicFetcher = <T>(endpoint: string, options?: RequestInit) =>
 const privateFetcher = <T>(endpoint: string, options?: RequestInit) => 
   baseFetcher<T>(PRIVATE_API_BASE_URL, endpoint, options, false);
 
-const adminFetcher = <T>(endpoint: string, options?: RequestInit) => 
-  baseFetcher<T>(PRIVATE_API_BASE_URL, endpoint, options, true);
+const adminFetcher = <T>(endpoint: string, options?: RequestInit) => {
+  const method = options?.method?.toUpperCase() || 'GET';
+  if (method === 'GET') {
+    return baseFetcher<T>(PRIVATE_API_BASE_URL, endpoint, options, true);
+  }
+  
+  return baseFetcher<T>(PRIVATE_API_BASE_URL, endpoint, {
+    ...options,
+    headers: {
+      ...options?.headers,
+      'x-site-key': SITE_KEY
+    }
+  }, false);
+};
 
 export const apiService = {
   // Public Endpoints (using publicFetcher)
