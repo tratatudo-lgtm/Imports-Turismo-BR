@@ -134,12 +134,25 @@ export interface AdminTicket {
   createdAt: string;
   subject?: string;
   description?: string;
+  // Real API fields
+  company_name?: string;
+  tracking_code?: string;
+  created_at?: string;
+  phone_e164?: string;
+  title?: string;
+  metadata?: {
+    destination?: string;
+    [key: string]: any;
+  };
 }
 
 export interface AdminTicketStats {
   activeTickets: number;
   complaints: number;
   totalTickets: number;
+  // Real API fields
+  openTickets?: number;
+  closedTickets?: number;
 }
 
 export interface AdminSalesStats {
@@ -147,6 +160,12 @@ export interface AdminSalesStats {
   totalRevenue: number;
   averageTicket: number;
   monthlySales: number;
+  // Real API fields
+  activeSubscriptions?: number;
+  trialSubscriptions?: number;
+  suspendedSubscriptions?: number;
+  avgTicket?: number;
+  monthlyRevenue?: number;
 }
 
 export interface AdminSale {
@@ -156,6 +175,12 @@ export interface AdminSale {
   valor: number;
   status: string;
   createdAt: string;
+  // Real API fields
+  plan?: string;
+  created_at?: string;
+  started_at?: string;
+  company_name?: string;
+  client_name?: string;
 }
 
 export interface AdminClient {
@@ -166,6 +191,10 @@ export interface AdminClient {
   createdAt: string;
   totalTickets?: number;
   totalSpent?: number;
+  // Real API fields
+  company_name?: string;
+  phone_e164?: string;
+  created_at?: string;
 }
 
 // API Responses

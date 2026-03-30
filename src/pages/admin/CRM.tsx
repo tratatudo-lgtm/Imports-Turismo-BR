@@ -62,11 +62,15 @@ export default function CRM() {
     navigate('/admin/login');
   };
 
-  const filteredCustomers = customers.filter(c => 
-    c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.telefone.includes(searchTerm)
-  );
+  const filteredCustomers = customers.filter(c => {
+    const nome = c.company_name || c.nome || 'Cliente';
+    const email = c.email || '';
+    const phone = c.phone_e164 || c.telefone || '';
+    
+    return String(nome).toLowerCase().includes(searchTerm.toLowerCase()) || 
+           String(email).toLowerCase().includes(searchTerm.toLowerCase()) ||
+           String(phone).toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   if (isLoading) {
     return (
@@ -156,34 +160,41 @@ export default function CRM() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {filteredCustomers.map((customer) => (
-                    <tr key={customer.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
-                            {customer.nome.charAt(0)}
+                  {filteredCustomers.map((customer) => {
+                    const nome = customer.company_name || customer.nome || 'Cliente';
+                    const telefone = customer.phone_e164 || customer.telefone || '';
+                    const email = customer.email || '';
+                    const createdAt = customer.created_at || customer.createdAt || null;
+
+                    return (
+                      <tr key={customer.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
+                              {nome.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-blue-950">{nome}</p>
+                              <p className="text-xs text-gray-400">{email}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-bold text-blue-950">{customer.nome}</p>
-                            <p className="text-xs text-gray-400">{customer.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-medium text-gray-600">{customer.telefone}</p>
-                      </td>
-                      <td className="px-6 py-4 text-xs text-gray-400">
-                        {new Date(customer.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <Link to={`/admin/crm/${customer.id}`}>
-                          <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
-                            Detalhes <ChevronRight className="w-4 h-4 ml-1" />
-                          </Button>
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-medium text-gray-600">{telefone}</p>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-gray-400">
+                          {createdAt ? new Date(createdAt).toLocaleDateString() : 'Data indisponível'}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <Link to={`/admin/crm/${customer.id}`}>
+                            <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
+                              Detalhes <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

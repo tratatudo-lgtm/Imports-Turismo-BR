@@ -69,10 +69,13 @@ export default function AdminSales() {
     navigate('/admin/login');
   };
 
-  const filteredSales = sales.filter(s => 
-    s.cliente.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    s.produto.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSales = sales.filter(s => {
+    const cliente = s.company_name || s.client_name || s.cliente || 'Cliente';
+    const produto = s.plan || s.produto || 'Plano';
+    
+    return String(cliente).toLowerCase().includes(searchTerm.toLowerCase()) || 
+           String(produto).toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   if (isLoading) {
     return (
@@ -203,47 +206,55 @@ export default function AdminSales() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {filteredSales.map((sale) => (
-                    <tr key={sale.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-xs font-bold">
-                            {sale.cliente.charAt(0)}
+                  {filteredSales.map((sale) => {
+                    const cliente = sale.company_name || sale.client_name || sale.cliente || 'Cliente';
+                    const produto = sale.plan || sale.produto || 'Plano';
+                    const valor = sale.amount || sale.valor || 0;
+                    const status = sale.status || 'Pendente';
+                    const createdAt = sale.created_at || sale.createdAt || null;
+
+                    return (
+                      <tr key={sale.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-xs font-bold">
+                              {cliente.charAt(0)}
+                            </div>
+                            <p className="text-sm font-bold text-blue-950">{cliente}</p>
                           </div>
-                          <p className="text-sm font-bold text-blue-950">{sale.cliente}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-medium text-gray-600">{sale.produto}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-bold text-blue-950">R$ {sale.valor.toLocaleString()}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={cn(
-                          "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                          sale.status === 'Pago' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-amber-100 text-amber-700 border-amber-200'
-                        )}>
-                          {sale.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-xs text-gray-400">
-                        {new Date(sale.createdAt || '').toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="relative group inline-block">
-                          <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
-                            Detalhes <ChevronRight className="w-4 h-4 ml-1" />
-                          </Button>
-                          <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
-                            <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
-                              Em preparação
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-medium text-gray-600">{produto}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-bold text-blue-950">R$ {valor.toLocaleString()}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={cn(
+                            "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                            ['pago', 'active', 'ativo'].includes(status.toLowerCase()) ? 'bg-green-100 text-green-700 border-green-200' : 'bg-amber-100 text-amber-700 border-amber-200'
+                          )}>
+                            {status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-gray-400">
+                          {createdAt ? new Date(createdAt).toLocaleDateString() : 'Data indisponível'}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="relative group inline-block">
+                            <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
+                              Detalhes <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                            <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
+                              <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
+                                Em preparação
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

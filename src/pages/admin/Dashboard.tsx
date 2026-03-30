@@ -78,29 +78,39 @@ export default function AdminDashboard() {
   };
 
   const isComplaint = (t: AdminTicket) => {
-    const kind = (t.kind || '').toLowerCase();
-    const category = (t.category || '').toLowerCase();
+    const kind = String(t.kind || '').toLowerCase();
+    const category = String(t.category || '').toLowerCase();
     return kind.includes('reclam') || category.includes('reclam') || category.includes('pos_venda');
   };
 
   const ordersList = tickets.filter(t => !isComplaint(t));
   const complaintsList = tickets.filter(t => isComplaint(t));
 
-  const filteredOrders = ordersList.filter(o => 
-    o.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (o.trackingCode && o.trackingCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    o.destino.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 10);
+  const filteredOrders = ordersList.filter(o => {
+    const nome = o.company_name || o.nome || o.client_name || 'Cliente';
+    const trackingCode = o.tracking_code || o.trackingCode || String(o.id || '');
+    const destino = o.metadata?.destination || o.destino || o.category || 'Geral';
+    
+    return String(nome || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+           String(trackingCode || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+           String(destino || '').toLowerCase().includes(searchTerm.toLowerCase());
+  }).slice(0, 10);
 
-  const filteredClients = clients.filter(c => 
-    c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.email.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 10);
+  const filteredClients = clients.filter(c => {
+    const nome = c.company_name || c.nome || 'Cliente';
+    const email = c.email || '';
+    
+    return String(nome || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+           String(email || '').toLowerCase().includes(searchTerm.toLowerCase());
+  }).slice(0, 10);
 
-  const filteredComplaints = complaintsList.filter(c => 
-    c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.trackingCode.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 10);
+  const filteredComplaints = complaintsList.filter(c => {
+    const nome = c.company_name || c.nome || c.client_name || 'Cliente';
+    const trackingCode = c.tracking_code || c.trackingCode || String(c.id || '');
+    
+    return String(nome || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+           String(trackingCode || '').toLowerCase().includes(searchTerm.toLowerCase());
+  }).slice(0, 10);
 
   if (isLoading) {
     return (
@@ -304,48 +314,56 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {activeTab === 'pedidos' && (
-                      filteredOrders.length > 0 ? filteredOrders.map((pedido, i) => (
-                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
-                                {pedido.nome.charAt(0)}
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-blue-950">{pedido.nome}</p>
-                                <p className="text-xs text-gray-400">{pedido.telefone}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <p className="text-sm font-medium text-gray-600">{pedido.destino}</p>
-                            <p className="text-xs text-gray-400 font-mono">{pedido.trackingCode}</p>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={cn(
-                              "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                              activeStatuses.includes((pedido.status || '').toLowerCase()) ? "bg-amber-100 text-amber-600" : "bg-green-100 text-green-600"
-                            )}>
-                              {pedido.status || 'pendente'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-xs text-gray-400">
-                            {new Date(pedido.createdAt || '').toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="relative group inline-block">
-                              <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
-                                Gerir <ChevronRight className="w-4 h-4 ml-1" />
-                              </Button>
-                              <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
-                                <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
-                                  Em preparação
+                      filteredOrders.length > 0 ? filteredOrders.map((pedido, i) => {
+                        const nome = pedido.company_name || pedido.nome || pedido.client_name || 'Cliente';
+                        const telefone = pedido.phone_e164 || pedido.telefone || '';
+                        const trackingCode = pedido.tracking_code || pedido.trackingCode || String(pedido.id || '');
+                        const destino = pedido.metadata?.destination || pedido.destino || pedido.category || 'Geral';
+                        const createdAt = pedido.created_at || pedido.createdAt || null;
+
+                        return (
+                          <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
+                                  {nome.charAt(0)}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-bold text-blue-950">{nome}</p>
+                                  <p className="text-xs text-gray-400">{telefone}</p>
                                 </div>
                               </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )) : (
+                            </td>
+                            <td className="px-6 py-4">
+                              <p className="text-sm font-medium text-gray-600">{destino}</p>
+                              <p className="text-xs text-gray-400 font-mono">{trackingCode}</p>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={cn(
+                                "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                                activeStatuses.includes((pedido.status || '').toLowerCase()) ? "bg-amber-100 text-amber-600" : "bg-green-100 text-green-600"
+                              )}>
+                                {pedido.status || 'pendente'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-xs text-gray-400">
+                              {createdAt ? new Date(createdAt).toLocaleDateString() : 'Data indisponível'}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="relative group inline-block">
+                                <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
+                                  Gerir <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                                <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
+                                  <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
+                                    Em preparação
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      }) : (
                         <tr>
                           <td colSpan={5} className="px-6 py-12 text-center">
                             <p className="text-gray-400 italic">Nenhum pedido encontrado.</p>
@@ -354,42 +372,49 @@ export default function AdminDashboard() {
                       )
                     )}
                     {activeTab === 'leads' && (
-                      filteredClients.length > 0 ? filteredClients.map((customer, i) => (
-                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 font-bold">
-                                {customer.nome.charAt(0)}
+                      filteredClients.length > 0 ? filteredClients.map((customer, i) => {
+                        const nome = customer.company_name || customer.nome || 'Cliente';
+                        const telefone = customer.phone_e164 || customer.telefone || '';
+                        const email = customer.email || '';
+                        const createdAt = customer.created_at || customer.createdAt || null;
+
+                        return (
+                          <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 font-bold">
+                                  {nome.charAt(0)}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-bold text-blue-950">{nome}</p>
+                                  <p className="text-xs text-gray-400">{telefone}</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="text-sm font-bold text-blue-950">{customer.nome}</p>
-                                <p className="text-xs text-gray-400">{customer.telefone}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <p className="text-sm font-medium text-gray-600">{customer.email}</p>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-600">
-                              Cliente CRM
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-xs text-gray-400">
-                            {new Date(customer.createdAt || '').toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-blue-600 hover:bg-blue-50"
-                              onClick={() => navigate(`/admin/crm/${customer.id}`)}
-                            >
-                              Detalhes <ChevronRight className="w-4 h-4 ml-1" />
-                            </Button>
-                          </td>
-                        </tr>
-                      )) : (
+                            </td>
+                            <td className="px-6 py-4">
+                              <p className="text-sm font-medium text-gray-600">{email}</p>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-600">
+                                Cliente CRM
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-xs text-gray-400">
+                              {createdAt ? new Date(createdAt).toLocaleDateString() : 'Data indisponível'}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-blue-600 hover:bg-blue-50"
+                                onClick={() => navigate(`/admin/crm/${customer.id}`)}
+                              >
+                                Detalhes <ChevronRight className="w-4 h-4 ml-1" />
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      }) : (
                         <tr>
                           <td colSpan={5} className="px-6 py-12 text-center">
                             <p className="text-gray-400 italic">Nenhuma lead encontrada.</p>
@@ -398,47 +423,54 @@ export default function AdminDashboard() {
                       )
                     )}
                     {activeTab === 'reclamacoes' && (
-                      filteredComplaints.length > 0 ? filteredComplaints.map((reclamacao, i) => (
-                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold">
-                                {reclamacao.nome.charAt(0)}
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-blue-950">{reclamacao.nome}</p>
-                                <p className="text-xs text-gray-400">{reclamacao.trackingCode}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <p className="text-sm font-medium text-gray-600 truncate max-w-xs">{reclamacao.subject || reclamacao.destino}</p>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={cn(
-                              "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                              activeStatuses.includes((reclamacao.status || '').toLowerCase()) ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
-                            )}>
-                              {reclamacao.status || 'pendente'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-xs text-gray-400">
-                            {new Date(reclamacao.createdAt || '').toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="relative group inline-block">
-                              <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
-                                Analisar <ChevronRight className="w-4 h-4 ml-1" />
-                              </Button>
-                              <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
-                                <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
-                                  Em preparação
+                      filteredComplaints.length > 0 ? filteredComplaints.map((reclamacao, i) => {
+                        const nome = reclamacao.company_name || reclamacao.nome || reclamacao.client_name || 'Cliente';
+                        const trackingCode = reclamacao.tracking_code || reclamacao.trackingCode || String(reclamacao.id || '');
+                        const assunto = reclamacao.title || reclamacao.subject || reclamacao.description || 'Sem assunto';
+                        const createdAt = reclamacao.created_at || reclamacao.createdAt || null;
+
+                        return (
+                          <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold">
+                                  {nome.charAt(0)}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-bold text-blue-950">{nome}</p>
+                                  <p className="text-xs text-gray-400">{trackingCode}</p>
                                 </div>
                               </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )) : (
+                            </td>
+                            <td className="px-6 py-4">
+                              <p className="text-sm font-medium text-gray-600 truncate max-w-xs">{assunto}</p>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={cn(
+                                "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                                activeStatuses.includes((reclamacao.status || '').toLowerCase()) ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
+                              )}>
+                                {reclamacao.status || 'pendente'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-xs text-gray-400">
+                              {createdAt ? new Date(createdAt).toLocaleDateString() : 'Data indisponível'}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="relative group inline-block">
+                                <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
+                                  Analisar <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                                <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
+                                  <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
+                                    Em preparação
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      }) : (
                         <tr>
                           <td colSpan={5} className="px-6 py-12 text-center">
                             <p className="text-gray-400 italic">Nenhuma reclamação encontrada.</p>

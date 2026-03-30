@@ -141,11 +141,11 @@ export default function CustomerDetail() {
             <Card className="p-8 border-none shadow-sm space-y-8">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-3xl font-bold">
-                  {customer.nome.charAt(0)}
+                  {(customer.company_name || customer.nome || 'C').charAt(0)}
                 </div>
                 <div className="space-y-1">
-                  <h2 className="text-2xl font-bold text-blue-950">{customer.nome}</h2>
-                  <p className="text-sm text-gray-400 uppercase tracking-widest font-bold">Cliente desde {new Date(customer.createdAt).toLocaleDateString()}</p>
+                  <h2 className="text-2xl font-bold text-blue-950">{customer.company_name || customer.nome || 'Cliente'}</h2>
+                  <p className="text-sm text-gray-400 uppercase tracking-widest font-bold">Cliente desde {new Date(customer.created_at || customer.createdAt || '').toLocaleDateString()}</p>
                 </div>
               </div>
 
@@ -156,7 +156,7 @@ export default function CustomerDetail() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">E-mail</p>
-                    <p className="text-sm font-bold text-blue-950">{customer.email}</p>
+                    <p className="text-sm font-bold text-blue-950">{customer.email || 'Não informado'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -165,7 +165,7 @@ export default function CustomerDetail() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Telefone</p>
-                    <p className="text-sm font-bold text-blue-950">{customer.telefone}</p>
+                    <p className="text-sm font-bold text-blue-950">{customer.phone_e164 || customer.telefone || 'Não informado'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -189,7 +189,7 @@ export default function CustomerDetail() {
               )}
 
               <div className="pt-6 border-t border-gray-100">
-                <Button className="w-full" variant="outline" onClick={() => window.open(`https://wa.me/${customer.telefone.replace(/\D/g, '')}`, '_blank')}>
+                <Button className="w-full" variant="outline" onClick={() => window.open(`https://wa.me/${(customer.phone_e164 || customer.telefone || '').replace(/\D/g, '')}`, '_blank')}>
                   <MessageSquare className="w-4 h-4 mr-2" /> Contactar via WhatsApp
                 </Button>
               </div>
@@ -262,16 +262,16 @@ export default function CustomerDetail() {
                     <Card key={pedido.id} className="p-6 border-none shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-start mb-4">
                         <div className="space-y-1">
-                          <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">{pedido.trackingCode}</p>
-                          <h4 className="font-bold text-blue-950">{pedido.destino}</h4>
+                          <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">{pedido.tracking_code || pedido.trackingCode}</p>
+                          <h4 className="font-bold text-blue-950">{pedido.metadata?.destination || pedido.destino || pedido.category}</h4>
                         </div>
                         <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
                           {pedido.status}
                         </span>
                       </div>
                       <div className="flex justify-between items-center pt-4 border-t border-gray-50">
-                        <p className="text-xs text-gray-400">{new Date(pedido.createdAt || '').toLocaleDateString()}</p>
-                        <Link to={`/admin/pedidos?search=${pedido.trackingCode}`} className="text-xs font-bold text-blue-600 hover:underline">Ver Pedido</Link>
+                        <p className="text-xs text-gray-400">{new Date(pedido.created_at || pedido.createdAt || '').toLocaleDateString()}</p>
+                        <Link to={`/admin/pedidos?search=${pedido.tracking_code || pedido.trackingCode}`} className="text-xs font-bold text-blue-600 hover:underline">Ver Pedido</Link>
                       </div>
                     </Card>
                   ))}

@@ -71,11 +71,15 @@ export default function AdminOrders() {
     navigate('/admin/login');
   };
 
-  const filteredOrders = orders.filter(o => 
-    o.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    o.trackingCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    o.destino.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredOrders = orders.filter(o => {
+    const nome = o.company_name || o.nome || o.client_name || 'Cliente';
+    const trackingCode = o.tracking_code || o.trackingCode || String(o.id || '');
+    const destino = o.metadata?.destination || o.destino || o.category || 'Geral';
+    
+    return String(nome).toLowerCase().includes(searchTerm.toLowerCase()) || 
+           String(trackingCode).toLowerCase().includes(searchTerm.toLowerCase()) ||
+           String(destino).toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -179,54 +183,63 @@ export default function AdminOrders() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {filteredOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-mono font-bold text-blue-950">{order.trackingCode}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-xs font-bold">
-                            {order.nome.charAt(0)}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-blue-950">{order.nome}</p>
-                            <p className="text-xs text-gray-400">{order.telefone}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-medium text-gray-600 truncate max-w-[150px]">{order.observacoes || 'Pedido de Orçamento'}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-medium text-gray-600">{order.destino}</p>
-                        <p className="text-xs text-gray-400">{order.periodo}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={cn(
-                          "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                          getStatusColor(order.status || 'pendente')
-                        )}>
-                          {order.status || 'pendente'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-xs text-gray-400">
-                        {new Date(order.createdAt || '').toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="relative group inline-block">
-                          <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
-                            Gerir <ChevronRight className="w-4 h-4 ml-1" />
-                          </Button>
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50">
-                            <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
-                              Em preparação
+                  {filteredOrders.map((order) => {
+                    const nome = order.company_name || order.nome || order.client_name || 'Cliente';
+                    const telefone = order.phone_e164 || order.telefone || '';
+                    const trackingCode = order.tracking_code || order.trackingCode || String(order.id || '');
+                    const destino = order.metadata?.destination || order.destino || order.category || 'Geral';
+                    const createdAt = order.created_at || order.createdAt || null;
+                    const assunto = order.title || order.subject || order.description || 'Pedido de Orçamento';
+
+                    return (
+                      <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-mono font-bold text-blue-950">{trackingCode}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-xs font-bold">
+                              {nome.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-blue-950">{nome}</p>
+                              <p className="text-xs text-gray-400">{telefone}</p>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-medium text-gray-600 truncate max-w-[150px]">{assunto}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-medium text-gray-600">{destino}</p>
+                          <p className="text-xs text-gray-400">{order.periodo}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={cn(
+                            "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                            getStatusColor(order.status || 'pendente')
+                          )}>
+                            {order.status || 'pendente'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-gray-400">
+                          {createdAt ? new Date(createdAt).toLocaleDateString() : 'Data indisponível'}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="relative group inline-block">
+                            <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
+                              Gerir <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50">
+                              <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
+                                Em preparação
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -128,24 +128,38 @@ export const apiService = {
 
   // Admin Dashboard (Session-based)
   getAdminTickets: () => 
-    privateFetcher<AdminTicket[]>('/admin/tickets'),
+    privateFetcher<any>('/admin/tickets').then(res => res.tickets || []),
   
   getAdminTicketStats: () => 
-    privateFetcher<AdminTicketStats>('/admin/tickets/stats'),
+    privateFetcher<any>('/admin/tickets/stats').then(res => res.stats || { 
+      totalTickets: 0, 
+      activeTickets: 0, 
+      complaints: 0, 
+      openTickets: 0, 
+      closedTickets: 0 
+    }),
   
   // Admin CRM
   getAdminClients: () => 
-    privateFetcher<AdminClient[]>('/admin/clients'),
+    privateFetcher<any>('/admin/clients').then(res => res.clients || []),
   
   getAdminClientDetail: (id: string) => 
-    privateFetcher<AdminClient>(`/admin/clients/${id}`),
+    privateFetcher<any>(`/admin/clients/${id}`).then(res => res.client || res),
 
   // Admin Sales
   getAdminSales: () => 
-    privateFetcher<AdminSale[]>('/admin/sales'),
+    privateFetcher<any>('/admin/sales').then(res => res.sales || []),
 
   getAdminSalesStats: () => 
-    privateFetcher<AdminSalesStats>('/admin/sales/stats'),
+    privateFetcher<any>('/admin/sales/stats').then(res => res.stats || { 
+      totalSales: 0, 
+      activeSubscriptions: 0, 
+      trialSubscriptions: 0, 
+      suspendedSubscriptions: 0, 
+      totalRevenue: 0, 
+      avgTicket: 0, 
+      monthlyRevenue: 0 
+    }),
 
   updateTicketStatus: (id: string, status: string) =>
     privateFetcher<any>(`/admin/tickets/${id}/status`, {
