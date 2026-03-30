@@ -44,22 +44,23 @@ export default function ClientSupport() {
   const [searchTerm, setSearchTerm] = useState('');
   const [session, setSession] = useState<any>(null);
 
-  const token = localStorage.getItem('client_token');
-
   useEffect(() => {
-    if (!token) {
-      navigate('/cliente/login');
-      return;
-    }
-
     const fetchSupport = async () => {
       try {
         const [sessionData, ticketsData] = await Promise.all([
-          apiService.getSession(token).catch(() => null),
-          apiService.getClientTickets(token)
+          apiService.getSession().catch(() => null),
+          apiService.getClientTickets().catch(() => [])
         ]);
+
+        if (!sessionData) {
+          navigate('/cliente/login');
+          return;
+        }
+
         setSession(sessionData);
         setTickets(ticketsData || []);
+        
+        localStorage.setItem('client_data', JSON.stringify(sessionData));
       } catch (err: any) {
         if (err.message?.includes('401')) {
           localStorage.removeItem('client_token');
@@ -74,7 +75,7 @@ export default function ClientSupport() {
     };
 
     fetchSupport();
-  }, [token, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('client_token');

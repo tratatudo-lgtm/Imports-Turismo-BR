@@ -38,23 +38,23 @@ export default function ClientProfile() {
   const [profile, setProfile] = useState<Customer | null>(null);
   const [session, setSession] = useState<any>(null);
 
-  const token = localStorage.getItem('client_token');
-
   useEffect(() => {
-    if (!token) {
-      navigate('/cliente/login');
-      return;
-    }
-
     const fetchData = async () => {
       try {
         const [profileData, sessionData] = await Promise.all([
-          apiService.getClientProfile(token),
-          apiService.getSession(token).catch(() => null)
+          apiService.getClientProfile(),
+          apiService.getSession().catch(() => null)
         ]);
         
+        if (!sessionData) {
+          navigate('/cliente/login');
+          return;
+        }
+
         setProfile(profileData);
         setSession(sessionData);
+        
+        localStorage.setItem('client_data', JSON.stringify(sessionData));
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar o seu perfil.');
         if (err.message?.includes('401')) {
@@ -68,7 +68,7 @@ export default function ClientProfile() {
     };
 
     fetchData();
-  }, [token, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('client_token');

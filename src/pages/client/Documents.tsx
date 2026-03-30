@@ -46,23 +46,23 @@ export default function ClientDocuments() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const token = localStorage.getItem('client_token');
-
   useEffect(() => {
-    if (!token) {
-      navigate('/cliente/login');
-      return;
-    }
-
     const fetchData = async () => {
       try {
         const [docsData, sessionData] = await Promise.all([
-          apiService.getClientDocuments(token),
-          apiService.getSession(token).catch(() => null)
+          apiService.getClientDocuments(),
+          apiService.getSession().catch(() => null)
         ]);
         
+        if (!sessionData) {
+          navigate('/cliente/login');
+          return;
+        }
+
         setDocuments(docsData);
         setSession(sessionData);
+        
+        localStorage.setItem('client_data', JSON.stringify(sessionData));
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar os seus documentos.');
         if (err.message?.includes('401')) {
@@ -76,7 +76,7 @@ export default function ClientDocuments() {
     };
 
     fetchData();
-  }, [token, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('client_token');
@@ -85,9 +85,8 @@ export default function ClientDocuments() {
   };
 
   const handleDownload = async (docId: string, fileName: string) => {
-    if (!token) return;
     try {
-      const blob = await apiService.downloadDocument(token, docId);
+      const blob = await apiService.downloadDocument(docId);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

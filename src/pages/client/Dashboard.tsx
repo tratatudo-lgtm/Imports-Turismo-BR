@@ -37,29 +37,25 @@ export default function ClientDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const token = localStorage.getItem('client_token');
-
   useEffect(() => {
-    if (!token) {
-      navigate('/cliente/login');
-      return;
-    }
-
     const fetchData = async () => {
       try {
         const [sessionData, statsData, ticketsData] = await Promise.all([
-          apiService.getSession(token).catch(() => null),
-          apiService.getClientDashboardStats(token).catch(() => null),
-          apiService.getClientTickets(token).catch(() => [])
+          apiService.getSession().catch(() => null),
+          apiService.getClientDashboardStats().catch(() => null),
+          apiService.getClientTickets().catch(() => [])
         ]);
+
+        if (!sessionData) {
+          navigate('/cliente/login');
+          return;
+        }
 
         setSession(sessionData);
         setStats(statsData);
         setTickets(ticketsData || []);
         
-        if (sessionData) {
-          localStorage.setItem('client_data', JSON.stringify(sessionData));
-        }
+        localStorage.setItem('client_data', JSON.stringify(sessionData));
       } catch (err: any) {
         // Only show error if it's a real failure, not just empty data
         if (err.message?.includes('401')) {
@@ -75,7 +71,7 @@ export default function ClientDashboard() {
     };
 
     fetchData();
-  }, [token, navigate]);
+  }, [navigate]);
 
   const activeTickets = tickets.filter(t => 
     ['aberto', 'pendente', 'em_analise', 'open', 'pending', 'in_analysis'].includes(t.status?.toLowerCase()) &&
@@ -95,9 +91,8 @@ export default function ClientDashboard() {
   };
 
   const handleDownload = async (docId: string, fileName: string) => {
-    if (!token) return;
     try {
-      const blob = await apiService.downloadDocument(token, docId);
+      const blob = await apiService.downloadDocument(docId);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

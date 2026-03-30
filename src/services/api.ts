@@ -40,6 +40,9 @@ async function baseFetcher<T>(baseUrl: string, endpoint: string, options?: Reque
       'Content-Type': 'application/json',
       ...options?.headers,
     },
+    // Ensure credentials (cookies) are included for all requests
+    // This is critical for session-based authentication
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -112,38 +115,38 @@ export const apiService = {
     }),
 
   // Admin Dashboard (requires token)
-  getDashboard: (token: string) => 
+  getDashboard: (token?: string) => 
     privateFetcher<DashboardStats>('/admin/dashboard', { 
-      headers: { Authorization: `Bearer ${token}` } 
+      headers: token ? { Authorization: `Bearer ${token}` } : {} 
     }),
   
   // Admin CRM
-  getCRM: (token: string) => 
+  getCRM: (token?: string) => 
     privateFetcher<Customer[]>('/admin/crm', { 
-      headers: { Authorization: `Bearer ${token}` } 
+      headers: token ? { Authorization: `Bearer ${token}` } : {} 
     }),
   
-  getCustomerDetail: (token: string, id: string) => 
+  getCustomerDetail: (token: string | undefined, id: string) => 
     privateFetcher<Customer>(`/admin/crm/${id}`, { 
-      headers: { Authorization: `Bearer ${token}` } 
+      headers: token ? { Authorization: `Bearer ${token}` } : {} 
     }),
 
   // Admin Orders
-  getAdminPedidos: (token: string) => 
+  getAdminPedidos: (token?: string) => 
     privateFetcher<QuoteRequest[]>('/admin/pedidos', { 
-      headers: { Authorization: `Bearer ${token}` } 
+      headers: token ? { Authorization: `Bearer ${token}` } : {} 
     }),
 
   // Admin Complaints
-  getAdminReclamacoes: (token: string) => 
+  getAdminReclamacoes: (token?: string) => 
     privateFetcher<Complaint[]>('/admin/reclamacoes', { 
-      headers: { Authorization: `Bearer ${token}` } 
+      headers: token ? { Authorization: `Bearer ${token}` } : {} 
     }),
 
   // Admin Sales
-  getAdminVendas: (token: string) => 
+  getAdminVendas: (token?: string) => 
     privateFetcher<Sale[]>('/admin/vendas', { 
-      headers: { Authorization: `Bearer ${token}` } 
+      headers: token ? { Authorization: `Bearer ${token}` } : {} 
     }),
 
   // Client Auth
@@ -159,10 +162,8 @@ export const apiService = {
       body: JSON.stringify({ phone_e164: phoneNumber, code: otp }) 
     }),
 
-  getSession: (token: string) => 
-    privateFetcher<any>('/auth/session', { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  getSession: () => 
+    privateFetcher<any>('/auth/session'),
 
   requestMagicLink: (email: string) => 
     privateFetcher<MagicLinkResponse>('/auth/request-magic-link', { method: 'POST', body: JSON.stringify({ email }) }),
@@ -170,59 +171,34 @@ export const apiService = {
   verifyMagicLink: (token: string) => 
     privateFetcher<ClientSession>('/auth/verify-magic-link', { method: 'POST', body: JSON.stringify({ token }) }),
 
-  // Client Area (requires token)
-  getClientDashboard: (token: string) => 
-    privateFetcher<ClientDashboardData>('/client/dashboard', { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  // Client Area (Session-based)
+  getClientDashboardStats: () => 
+    privateFetcher<any>('/client/dashboard/stats'),
 
-  getClientDashboardStats: (token: string) => 
-    privateFetcher<any>('/client/dashboard/stats', { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  getClientTickets: () => 
+    privateFetcher<any[]>('/client/tickets'),
 
-  getClientTickets: (token: string) => 
-    privateFetcher<any[]>('/client/tickets', { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  getTicketDetail: (id: string) => 
+    privateFetcher<any>(`/client/tickets/${id}`),
 
-  getTicketDetail: (token: string, id: string) => 
-    privateFetcher<any>(`/client/tickets/${id}`, { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  getTicketMessages: (id: string) => 
+    privateFetcher<any[]>(`/client/tickets/${id}/messages`),
 
-  getTicketMessages: (token: string, id: string) => 
-    privateFetcher<any[]>(`/client/tickets/${id}/messages`, { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
-
-  getTicketHistory: (token: string, id: string) => 
-    privateFetcher<any[]>(`/client/tickets/${id}/history`, { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  getTicketHistory: (id: string) => 
+    privateFetcher<any[]>(`/client/tickets/${id}/history`),
   
-  getClientPurchases: (token: string) => 
-    privateFetcher<Sale[]>('/client/compras', { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  getClientPurchases: () => 
+    privateFetcher<Sale[]>('/client/compras'),
   
-  getClientDocuments: (token: string) => 
-    privateFetcher<ClientDocument[]>('/client/documentos', { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  getClientDocuments: () => 
+    privateFetcher<ClientDocument[]>('/client/documentos'),
   
-  downloadDocument: (token: string, id: string) => 
-    privateFetcher<Blob>(`/client/documentos/${id}/download`, { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  downloadDocument: (id: string) => 
+    privateFetcher<Blob>(`/client/documentos/${id}/download`),
   
-  getClientSupport: (token: string) => 
-    privateFetcher<Complaint[]>('/client/apoio', { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  getClientSupport: () => 
+    privateFetcher<Complaint[]>('/client/apoio'),
   
-  getClientProfile: (token: string) => 
-    privateFetcher<Customer>('/client/perfil', { 
-      headers: { Authorization: `Bearer ${token}` } 
-    }),
+  getClientProfile: () => 
+    privateFetcher<Customer>('/client/perfil'),
 };
