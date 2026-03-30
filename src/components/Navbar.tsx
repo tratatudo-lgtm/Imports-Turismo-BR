@@ -41,20 +41,20 @@ export const Navbar = () => {
   return (
     <nav
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6',
-        isScrolled ? 'py-3' : 'py-6'
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-4 md:px-6',
+        isScrolled ? 'py-2 md:py-3' : 'py-4 md:py-6'
       )}
     >
       <div className={cn(
-        "max-w-7xl mx-auto rounded-[2rem] transition-all duration-500 flex items-center justify-between px-6 py-3",
-        isScrolled ? "bg-white/80 backdrop-blur-xl shadow-2xl shadow-blue-900/10 border border-white/20" : "bg-transparent"
+        "max-w-7xl mx-auto rounded-2xl md:rounded-[2rem] transition-all duration-500 flex items-center justify-between px-4 md:px-6 py-2 md:py-3",
+        isScrolled ? "bg-white/90 backdrop-blur-xl shadow-2xl shadow-blue-900/10 border border-white/20" : "bg-transparent"
       )}>
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="bg-blue-600 p-2 rounded-xl group-hover:rotate-12 transition-transform shadow-lg shadow-blue-600/20">
-            <Plane className="text-white w-5 h-5" />
+        <Link to="/" className="flex items-center gap-2 md:gap-3 group shrink-0">
+          <div className="bg-blue-600 p-1.5 md:p-2 rounded-lg md:rounded-xl group-hover:rotate-12 transition-transform shadow-lg shadow-blue-600/20">
+            <Plane className="text-white w-4 h-4 md:w-5 md:h-5" />
           </div>
           <span className={cn(
-            "text-lg md:text-xl font-black tracking-tighter transition-colors",
+            "text-base md:text-xl font-black tracking-tighter transition-colors whitespace-nowrap",
             isScrolled ? "text-blue-950" : "text-white"
           )}>
             Imports Turismo <span className="text-amber-500">BR</span>

@@ -27,7 +27,7 @@ export const ChatWindow = ({ onClose }: ChatWindowProps) => {
     {
       id: '1',
       role: 'assistant',
-      content: 'Olá! Bem-vindo à Imports Turismo BR. Como posso ajudar a planear a sua próxima aventura hoje?',
+      content: 'Olá. O atendimento automático web está em preparação. Pode deixar a sua mensagem ou seguir para orçamento, destinos ou apoio.',
       timestamp: new Date(),
     },
   ]);
@@ -51,19 +51,7 @@ export const ChatWindow = ({ onClose }: ChatWindowProps) => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setIsTyping(true);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Obrigado pelo seu contacto. Um dos nossos consultores especializados entrará em contacto consigo em breve para dar seguimento ao seu pedido. Se preferir ajuda imediata, pode também contactar-nos via WhatsApp.',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsTyping(false);
-    }, 1500);
+    // No fake response simulation as requested
   };
 
   return (
@@ -71,73 +59,81 @@ export const ChatWindow = ({ onClose }: ChatWindowProps) => {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="fixed bottom-24 right-6 w-[400px] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-8rem)] bg-white rounded-[2.5rem] shadow-2xl shadow-blue-900/30 flex flex-col overflow-hidden border border-gray-100 z-50"
+      className="fixed bottom-20 right-4 md:bottom-24 md:right-6 w-[calc(100vw-2rem)] md:w-[400px] h-[500px] md:h-[600px] max-h-[calc(100vh-10rem)] bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl shadow-blue-900/30 flex flex-col overflow-hidden border border-gray-100 z-50"
     >
       {/* Header */}
-      <div className="p-6 bg-blue-600 text-white flex items-center justify-between relative overflow-hidden">
+      <div className="p-4 md:p-6 bg-blue-600 text-white flex items-center justify-between relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 -skew-x-12 translate-x-1/4" />
-        <div className="relative z-10 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
-            <Globe className="w-6 h-6 text-amber-400" />
+        <div className="relative z-10 flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
+            <Globe className="w-5 h-5 md:w-6 md:h-6 text-amber-400" />
           </div>
           <div>
-            <h3 className="font-black tracking-tight text-lg">Imports Turismo BR</h3>
+            <h3 className="font-black tracking-tight text-base md:text-lg">Imports Turismo BR</h3>
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-xs font-bold text-blue-100 uppercase tracking-widest">Online Agora</span>
+              <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-[10px] font-bold text-blue-100 uppercase tracking-widest">Online Agora</span>
             </div>
           </div>
         </div>
-        <div className="relative z-10 flex items-center gap-2">
+        <div className="relative z-10 flex items-center gap-1 md:gap-2">
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
-            <Minus className="w-5 h-5" />
+            <Minus className="w-4 h-4 md:w-5 md:h-5" />
           </button>
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/50">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-gray-50/50">
         {messages.map((msg) => (
           <ChatMessage key={msg.id} message={msg} />
         ))}
         {isTyping && (
-          <div className="flex gap-2 p-4 bg-white rounded-2xl rounded-tl-none w-16 shadow-sm border border-gray-100">
-            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce" />
-            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce delay-100" />
-            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce delay-200" />
+          <div className="flex gap-2 p-3 md:p-4 bg-white rounded-2xl rounded-tl-none w-14 md:w-16 shadow-sm border border-gray-100">
+            <span className="w-1 md:w-1.5 h-1 md:h-1.5 bg-blue-600 rounded-full animate-bounce" />
+            <span className="w-1 md:w-1.5 h-1 md:h-1.5 bg-blue-600 rounded-full animate-bounce delay-100" />
+            <span className="w-1 md:w-1.5 h-1 md:h-1.5 bg-blue-600 rounded-full animate-bounce delay-200" />
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Quick Actions */}
-      <div className="px-6 py-3 bg-white border-t border-gray-100 flex gap-2 overflow-x-auto no-scrollbar">
+      <div className="px-4 md:px-6 py-2 md:py-3 bg-white border-t border-gray-100 flex gap-2 overflow-x-auto no-scrollbar">
         <Button 
           variant="ghost" 
           size="sm" 
-          className="whitespace-nowrap rounded-xl bg-blue-50 text-blue-600 border border-blue-100"
-          onClick={() => handleSendMessage('Quero um orçamento')}
+          className="whitespace-nowrap rounded-lg md:rounded-xl bg-blue-50 text-blue-600 border border-blue-100 text-[10px] md:text-xs h-8 md:h-9"
+          onClick={() => window.location.href = '/orcamento'}
         >
           Pedir Orçamento
         </Button>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="whitespace-nowrap rounded-xl bg-blue-50 text-blue-600 border border-blue-100"
-          onClick={() => handleSendMessage('Quero ver destinos')}
+          className="whitespace-nowrap rounded-lg md:rounded-xl bg-blue-50 text-blue-600 border border-blue-100 text-[10px] md:text-xs h-8 md:h-9"
+          onClick={() => window.location.href = '/destinos'}
         >
           Ver Destinos
         </Button>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="whitespace-nowrap rounded-xl bg-blue-50 text-blue-600 border border-blue-100"
-          onClick={() => handleSendMessage('Falar com consultor')}
+          className="whitespace-nowrap rounded-lg md:rounded-xl bg-blue-50 text-blue-600 border border-blue-100 text-[10px] md:text-xs h-8 md:h-9"
+          onClick={() => window.location.href = '/apoio'}
         >
           Falar com Consultor
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="whitespace-nowrap rounded-lg md:rounded-xl bg-blue-50 text-blue-600 border border-blue-100 text-[10px] md:text-xs h-8 md:h-9"
+          onClick={() => window.location.href = '/acompanhar'}
+        >
+          Acompanhar Pedido
         </Button>
       </div>
 

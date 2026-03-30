@@ -26,7 +26,7 @@ export default function Home() {
   return (
     <div className="space-y-24">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-blue-950 pt-20">
+      <section className="relative min-h-[80vh] md:min-h-screen flex items-center justify-center overflow-hidden bg-blue-950 pt-16 md:pt-20">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://picsum.photos/seed/travel/1920/1080?blur=2" 
@@ -34,29 +34,29 @@ export default function Home() {
             className="w-full h-full object-cover opacity-30 scale-105"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-950/80 via-blue-950/40 to-blue-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-950/90 via-blue-950/40 to-blue-950" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-12">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-8 md:space-y-12">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="space-y-6"
+            className="space-y-4 md:space-y-6"
           >
             <motion.span 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5 }}
-              className="inline-block px-6 py-2 bg-amber-500/10 text-amber-400 rounded-full text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 backdrop-blur-sm"
+              className="inline-block px-4 py-1.5 md:px-6 md:py-2 bg-amber-500/10 text-amber-400 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 backdrop-blur-sm"
             >
               Sua Próxima Aventura Começa Aqui
             </motion.span>
-            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] drop-shadow-2xl">
-              Explore o Mundo com <br/>
+            <h1 className="text-4xl md:text-8xl font-black text-white tracking-tighter leading-[1.1] md:leading-[0.9] drop-shadow-2xl">
+              Explore o Mundo com <br className="hidden md:block"/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Exclusividade</span>
             </h1>
-            <p className="text-xl md:text-2xl text-blue-100/60 max-w-3xl mx-auto font-medium leading-relaxed tracking-tight">
+            <p className="text-base md:text-2xl text-blue-100/60 max-w-3xl mx-auto font-medium leading-relaxed tracking-tight px-4 md:px-0">
               Atendimento personalizado para transformar seus sonhos de viagem em memórias inesquecíveis. Do Brasil para o mundo, cuidamos de cada detalhe.
             </p>
           </motion.div>
@@ -65,15 +65,15 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center px-4 md:px-0"
           >
             <Link to="/orcamento" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto h-16 px-12 text-xl rounded-2xl shadow-2xl shadow-blue-600/40">
-                Solicitar Orçamento <ArrowRight className="ml-2 w-6 h-6" />
+              <Button size="lg" className="w-full sm:w-auto h-14 md:h-16 px-8 md:px-12 text-lg md:text-xl rounded-xl md:rounded-2xl shadow-2xl shadow-blue-600/40">
+                Solicitar Orçamento <ArrowRight className="ml-2 w-5 h-5 md:w-6 md:h-6" />
               </Button>
             </Link>
             <Link to="/destinos" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto h-16 px-12 text-xl rounded-2xl border-white/20 text-white hover:bg-white/10 backdrop-blur-md">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 md:h-16 px-8 md:px-12 text-lg md:text-xl rounded-xl md:rounded-2xl border-white/20 text-white hover:bg-white/10 backdrop-blur-md">
                 Ver Destinos
               </Button>
             </Link>
@@ -180,52 +180,53 @@ export default function Home() {
 
       {/* Trust Section */}
       <section className="max-w-7xl mx-auto px-6 py-12">
-        <div className="bg-blue-600 rounded-[3rem] p-12 md:p-20 relative overflow-hidden">
+        <div className="bg-blue-600 rounded-3xl md:rounded-[3rem] p-8 md:p-20 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 -skew-x-12 translate-x-1/4" />
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-                Sua próxima viagem <br/>
+            <div className="space-y-6 md:space-y-8 text-center md:text-left">
+              <h2 className="text-3xl md:text-5xl font-bold text-white leading-tight">
+                Sua próxima viagem <br className="hidden md:block"/>
                 <span className="text-amber-400">começa com a gente.</span>
               </h2>
-              <p className="text-blue-50 text-lg font-light leading-relaxed">
+              <p className="text-blue-50 text-base md:text-lg font-light leading-relaxed">
                 Nossa equipe está preparada para desenhar cada detalhe da sua experiência. Fale conosco agora e receba um atendimento dedicado.
               </p>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Button 
                   variant="secondary" 
                   size="lg"
+                  className="w-full sm:w-auto"
                   onClick={() => window.open(`https://wa.me/${siteConfig.whatsapp}`, '_blank')}
                 >
                   <Phone className="w-5 h-5 mr-2" />
                   Falar no WhatsApp
                 </Button>
-                <Link to="/orcamento">
-                  <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
+                <Link to="/orcamento" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full bg-white text-blue-600 hover:bg-blue-50">
                     Pedir Orçamento
                   </Button>
                 </Link>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-4">
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
-                  <p className="text-3xl font-bold text-white">Suporte</p>
-                  <p className="text-blue-100 text-sm">Dedicado</p>
+                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
+                  <p className="text-2xl md:text-3xl font-bold text-white">Suporte</p>
+                  <p className="text-blue-100 text-xs md:text-sm">Dedicado</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
-                  <p className="text-3xl font-bold text-white">Experiência</p>
-                  <p className="text-blue-100 text-sm">Personalizada</p>
+                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
+                  <p className="text-2xl md:text-3xl font-bold text-white">Experiência</p>
+                  <p className="text-blue-100 text-xs md:text-sm">Personalizada</p>
                 </div>
               </div>
-              <div className="space-y-4 mt-8">
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
-                  <p className="text-3xl font-bold text-white">Confiança</p>
-                  <p className="text-blue-100 text-sm">e Transparência</p>
+              <div className="space-y-4 md:mt-8">
+                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
+                  <p className="text-2xl md:text-3xl font-bold text-white">Confiança</p>
+                  <p className="text-blue-100 text-xs md:text-sm">e Transparência</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
-                  <p className="text-3xl font-bold text-white">Qualidade</p>
-                  <p className="text-blue-100 text-sm">Garantida</p>
+                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl md:rounded-3xl border border-white/10 text-center md:text-left">
+                  <p className="text-2xl md:text-3xl font-bold text-white">Qualidade</p>
+                  <p className="text-blue-100 text-xs md:text-sm">Garantida</p>
                 </div>
               </div>
             </div>

@@ -68,11 +68,11 @@ export default function Contacts() {
               </div>
             </div>
             
-            <Card className="p-8 space-y-6 bg-white/10 backdrop-blur-xl border-white/10">
+            <Card className="p-6 md:p-8 space-y-6 bg-white/10 backdrop-blur-xl border-white/10">
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <input type="text" placeholder="Nome" className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500" />
-                  <input type="email" placeholder="E-mail" className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <input type="text" placeholder="Nome" className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500 w-full" />
+                  <input type="email" placeholder="E-mail" className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500 w-full" />
                 </div>
                 <input type="text" placeholder="Assunto" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500" />
                 <textarea placeholder="Mensagem" rows={4} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none" />
