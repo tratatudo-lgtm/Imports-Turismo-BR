@@ -217,9 +217,11 @@ export default function ClientPurchases() {
                       <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Estado</p>
                       <p className="text-xl font-black text-blue-950">{ticket.status}</p>
                     </div>
-                    <Button variant="outline" className="w-full md:w-auto rounded-xl group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all">
-                      Ver Detalhes <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
+                    <Link to={`/cliente/tickets/${ticket.id}`} className="w-full md:w-auto">
+                      <Button variant="outline" className="w-full rounded-xl group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all">
+                        Ver Detalhes <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </Card>

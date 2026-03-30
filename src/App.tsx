@@ -31,6 +31,7 @@ import ClientPurchases from './pages/client/Purchases';
 import ClientDocuments from './pages/client/Documents';
 import ClientSupport from './pages/client/Support';
 import ClientProfile from './pages/client/Profile';
+import TicketDetail from './pages/client/TicketDetail';
 
 export default function App() {
   return (
@@ -67,6 +68,7 @@ export default function App() {
           <Route path="/cliente/documentos" element={<ClientDocuments />} />
           <Route path="/cliente/apoio" element={<ClientSupport />} />
           <Route path="/cliente/perfil" element={<ClientProfile />} />
+          <Route path="/cliente/tickets/:id" element={<TicketDetail />} />
         </Routes>
       </Layout>
     </Router>

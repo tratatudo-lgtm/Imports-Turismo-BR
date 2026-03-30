@@ -227,9 +227,11 @@ export default function ClientSupport() {
                         </div>
                       </div>
                       <div className="flex items-center justify-end">
-                        <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
-                          Ver Conversa <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
+                        <Link to={`/cliente/tickets/${ticket.id}`}>
+                          <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
+                            Ver Conversa <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </Card>

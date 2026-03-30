@@ -257,7 +257,7 @@ export default function ClientDashboard() {
                           <p className="text-sm text-gray-500">{ticket.metadata?.destination || ticket.destination || ticket.category || 'Geral'} • {new Date(ticket.updated_at || ticket.created_at).toLocaleDateString()}</p>
                         </div>
                       </div>
-                      <Link to={`/cliente/apoio`}>
+                      <Link to={`/cliente/tickets/${ticket.id}`}>
                         <Button variant="ghost" size="sm" className="text-gray-400 group-hover:text-blue-600">
                           <ChevronRight className="w-5 h-5" />
                         </Button>
@@ -299,7 +299,7 @@ export default function ClientDashboard() {
                             <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">{ticket.status}</p>
                           </div>
                         </div>
-                        <Link to="/cliente/apoio" className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                        <Link to={`/cliente/tickets/${ticket.id}`} className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
                           <ChevronRight className="w-4 h-4" />
                         </Link>
                       </div>
