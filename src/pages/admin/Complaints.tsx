@@ -188,9 +188,16 @@ export default function AdminComplaints() {
                       <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Data</p>
                       <p className="text-sm font-medium text-blue-950">{new Date(complaint.data).toLocaleDateString()}</p>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50 group-hover:translate-x-1 transition-transform">
-                      Analisar <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
+                    <div className="relative group inline-block">
+                      <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
+                        Analisar <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                      <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
+                        <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
+                          Em preparação
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Card>

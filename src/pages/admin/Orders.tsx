@@ -168,6 +168,7 @@ export default function AdminOrders() {
                   <tr className="bg-gray-50 border-b border-gray-100">
                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Código</th>
                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Cliente</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Assunto</th>
                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Destino</th>
                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Estado</th>
                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Data</th>
@@ -192,6 +193,9 @@ export default function AdminOrders() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
+                        <p className="text-sm font-medium text-gray-600 truncate max-w-[150px]">{order.observacoes || 'Pedido de Orçamento'}</p>
+                      </td>
+                      <td className="px-6 py-4">
                         <p className="text-sm font-medium text-gray-600">{order.destino}</p>
                         <p className="text-xs text-gray-400">{order.periodo}</p>
                       </td>
@@ -207,9 +211,16 @@ export default function AdminOrders() {
                         {new Date(order.createdAt || '').toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
-                          Gerir <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
+                        <div className="relative group inline-block">
+                          <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
+                            Gerir <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50">
+                            <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
+                              Em preparação
+                            </div>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   ))}

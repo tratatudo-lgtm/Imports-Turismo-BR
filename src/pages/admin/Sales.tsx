@@ -231,9 +231,16 @@ export default function AdminSales() {
                         {new Date(sale.createdAt || '').toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
-                          Detalhes <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
+                        <div className="relative group inline-block">
+                          <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
+                            Detalhes <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                          <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
+                            <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
+                              Em preparação
+                            </div>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   ))}

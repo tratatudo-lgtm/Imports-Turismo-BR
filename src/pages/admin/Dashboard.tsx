@@ -18,7 +18,8 @@ import {
   CheckCircle2, 
   LayoutDashboard,
   User,
-  MessageSquare
+  MessageSquare,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -36,6 +37,7 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'leads' | 'pedidos' | 'reclamacoes'>('pedidos');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const token = localStorage.getItem('admin_token');
   const phone = localStorage.getItem('admin_phone');
@@ -87,6 +89,22 @@ export default function AdminDashboard() {
 
   const totalComplaints = complaints.length;
   const totalLeads = customers.length; // Using CRM as leads source
+
+  const filteredOrders = orders.filter(o => 
+    o.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (o.trackingCode && o.trackingCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    o.destino.toLowerCase().includes(searchTerm.toLowerCase())
+  ).slice(0, 10);
+
+  const filteredCustomers = customers.filter(c => 
+    c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.email.toLowerCase().includes(searchTerm.toLowerCase())
+  ).slice(0, 10);
+
+  const filteredComplaints = complaints.filter(c => 
+    c.cliente.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.referencia.toLowerCase().includes(searchTerm.toLowerCase())
+  ).slice(0, 10);
 
   if (isLoading) {
     return (
@@ -256,11 +274,23 @@ export default function AdminDashboard() {
               <div className="flex gap-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input placeholder="Pesquisar..." className="pl-9 h-10 text-sm w-48" />
+                  <Input 
+                    placeholder="Pesquisar..." 
+                    className="pl-9 h-10 text-sm w-48" 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
-                <Button variant="ghost" size="sm" className="bg-white border border-gray-100">
-                  <Filter className="w-4 h-4 mr-2" /> Filtrar
-                </Button>
+                <div className="relative group">
+                  <Button variant="ghost" size="sm" disabled className="bg-gray-50/50 border border-gray-100 text-gray-400 cursor-not-allowed">
+                    <Filter className="w-4 h-4 mr-2" /> Filtrar
+                  </Button>
+                  <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
+                    <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
+                      Em preparação
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -277,114 +307,148 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {activeTab === 'pedidos' && orders.slice(0, 10).map((pedido, i) => (
-                      <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
-                              {pedido.nome.charAt(0)}
+                    {activeTab === 'pedidos' && (
+                      filteredOrders.length > 0 ? filteredOrders.map((pedido, i) => (
+                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
+                                {pedido.nome.charAt(0)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-blue-950">{pedido.nome}</p>
+                                <p className="text-xs text-gray-400">{pedido.telefone}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-bold text-blue-950">{pedido.nome}</p>
-                              <p className="text-xs text-gray-400">{pedido.telefone}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-sm font-medium text-gray-600">{pedido.destino}</p>
+                            <p className="text-xs text-gray-400 font-mono">{pedido.trackingCode}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={cn(
+                              "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                              activeStatuses.includes((pedido.status || '').toLowerCase()) ? "bg-amber-100 text-amber-600" : "bg-green-100 text-green-600"
+                            )}>
+                              {pedido.status || 'pendente'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-xs text-gray-400">
+                            {new Date(pedido.createdAt || '').toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="relative group inline-block">
+                              <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
+                                Gerir <ChevronRight className="w-4 h-4 ml-1" />
+                              </Button>
+                              <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
+                                <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
+                                  Em preparação
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-sm font-medium text-gray-600">{pedido.destino}</p>
-                          <p className="text-xs text-gray-400 font-mono">{pedido.trackingCode}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={cn(
-                            "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                            activeStatuses.includes((pedido.status || '').toLowerCase()) ? "bg-amber-100 text-amber-600" : "bg-green-100 text-green-600"
-                          )}>
-                            {pedido.status || 'pendente'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-xs text-gray-400">
-                          {new Date(pedido.createdAt || '').toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button onClick={() => navigate('/admin/pedidos')} className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
-                            <MoreHorizontal className="w-5 h-5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {activeTab === 'leads' && customers.slice(0, 10).map((customer, i) => (
-                      <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 font-bold">
-                              {customer.nome.charAt(0)}
+                          </td>
+                        </tr>
+                      )) : (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12 text-center">
+                            <p className="text-gray-400 italic">Nenhum pedido encontrado.</p>
+                          </td>
+                        </tr>
+                      )
+                    )}
+                    {activeTab === 'leads' && (
+                      filteredCustomers.length > 0 ? filteredCustomers.map((customer, i) => (
+                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 font-bold">
+                                {customer.nome.charAt(0)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-blue-950">{customer.nome}</p>
+                                <p className="text-xs text-gray-400">{customer.telefone}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-bold text-blue-950">{customer.nome}</p>
-                              <p className="text-xs text-gray-400">{customer.telefone}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-sm font-medium text-gray-600">{customer.email}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-600">
+                              Cliente CRM
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-xs text-gray-400">
+                            {new Date(customer.createdAt || '').toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-blue-600 hover:bg-blue-50"
+                              onClick={() => navigate(`/admin/crm/${customer.id}`)}
+                            >
+                              Detalhes <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                          </td>
+                        </tr>
+                      )) : (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12 text-center">
+                            <p className="text-gray-400 italic">Nenhuma lead encontrada.</p>
+                          </td>
+                        </tr>
+                      )
+                    )}
+                    {activeTab === 'reclamacoes' && (
+                      filteredComplaints.length > 0 ? filteredComplaints.map((reclamacao, i) => (
+                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold">
+                                {reclamacao.cliente.charAt(0)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-blue-950">{reclamacao.cliente}</p>
+                                <p className="text-xs text-gray-400">{reclamacao.referencia}</p>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-sm font-medium text-gray-600">{customer.email}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-600">
-                            Cliente CRM
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-xs text-gray-400">
-                          {new Date(customer.createdAt || '').toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button onClick={() => navigate('/admin/crm')} className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
-                            <MoreHorizontal className="w-5 h-5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {activeTab === 'reclamacoes' && complaints.slice(0, 10).map((reclamacao, i) => (
-                      <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold">
-                              {reclamacao.cliente.charAt(0)}
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-sm font-medium text-gray-600 truncate max-w-xs">{reclamacao.descricao}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={cn(
+                              "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                              reclamacao.status === 'aberta' ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
+                            )}>
+                              {reclamacao.status || 'pendente'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-xs text-gray-400">
+                            {new Date(reclamacao.data || '').toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="relative group inline-block">
+                              <Button variant="ghost" size="sm" disabled className="text-gray-400 bg-gray-50/50 cursor-not-allowed">
+                                Analisar <ChevronRight className="w-4 h-4 ml-1" />
+                              </Button>
+                              <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50">
+                                <div className="bg-blue-950 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold">
+                                  Em preparação
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-bold text-blue-950">{reclamacao.cliente}</p>
-                              <p className="text-xs text-gray-400">{reclamacao.referencia}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-sm font-medium text-gray-600 truncate max-w-xs">{reclamacao.descricao}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={cn(
-                            "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                            reclamacao.status === 'aberta' ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
-                          )}>
-                            {reclamacao.status || 'pendente'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-xs text-gray-400">
-                          {new Date(reclamacao.data || '').toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button onClick={() => navigate('/admin/reclamacoes')} className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
-                            <MoreHorizontal className="w-5 h-5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {((activeTab === 'pedidos' && orders.length === 0) || 
-                      (activeTab === 'leads' && customers.length === 0) || 
-                      (activeTab === 'reclamacoes' && complaints.length === 0)) && (
-                      <tr>
-                        <td colSpan={5} className="px-6 py-12 text-center text-gray-400 italic">
-                          Nenhum registo encontrado nesta categoria.
-                        </td>
-                      </tr>
+                          </td>
+                        </tr>
+                      )) : (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12 text-center">
+                            <p className="text-gray-400 italic">Nenhuma reclamação encontrada.</p>
+                          </td>
+                        </tr>
+                      )
                     )}
                   </tbody>
                 </table>
@@ -429,15 +493,30 @@ export default function AdminDashboard() {
             <Card className="p-6 border-none shadow-sm space-y-6">
               <h4 className="font-bold text-blue-950">Ações Rápidas</h4>
               <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start text-sm border-gray-100 hover:bg-gray-50">
-                  <MessageSquare className="w-4 h-4 mr-3 text-blue-600" /> Enviar Mensagem Massa
-                </Button>
-                <Button variant="outline" className="w-full justify-start text-sm border-gray-100 hover:bg-gray-50">
-                  <TrendingUp className="w-4 h-4 mr-3 text-green-600" /> Exportar Relatório PDF
-                </Button>
-                <Button variant="outline" className="w-full justify-start text-sm border-gray-100 hover:bg-gray-50">
-                  <Users className="w-4 h-4 mr-3 text-amber-600" /> Gerir Consultores
-                </Button>
+                <div className="relative group">
+                  <Button variant="outline" disabled className="w-full justify-between text-sm border-gray-100 bg-gray-50/50 opacity-70 cursor-not-allowed">
+                    <div className="flex items-center">
+                      <MessageSquare className="w-4 h-4 mr-3 text-blue-600" /> Enviar Mensagem Massa
+                    </div>
+                    <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold">Em preparação</span>
+                  </Button>
+                </div>
+                <div className="relative group">
+                  <Button variant="outline" disabled className="w-full justify-between text-sm border-gray-100 bg-gray-50/50 opacity-70 cursor-not-allowed">
+                    <div className="flex items-center">
+                      <TrendingUp className="w-4 h-4 mr-3 text-green-600" /> Exportar Relatório PDF
+                    </div>
+                    <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-bold">Em preparação</span>
+                  </Button>
+                </div>
+                <div className="relative group">
+                  <Button variant="outline" disabled className="w-full justify-between text-sm border-gray-100 bg-gray-50/50 opacity-70 cursor-not-allowed">
+                    <div className="flex items-center">
+                      <Users className="w-4 h-4 mr-3 text-amber-600" /> Gerir Consultores
+                    </div>
+                    <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold">Em preparação</span>
+                  </Button>
+                </div>
               </div>
             </Card>
           </div>
