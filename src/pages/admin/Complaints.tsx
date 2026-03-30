@@ -33,7 +33,7 @@ export default function AdminComplaints() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const adminEmail = localStorage.getItem('admin_email');
+  const adminPhone = localStorage.getItem('admin_phone');
 
   useEffect(() => {
     const fetchComplaints = async () => {
@@ -59,8 +59,13 @@ export default function AdminComplaints() {
     fetchComplaints();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_email');
+  const handleLogout = async () => {
+    try {
+      await apiService.logoutAdmin();
+    } catch (err) {
+      console.error('Erro ao fazer logout:', err);
+    }
+    localStorage.removeItem('admin_phone');
     navigate('/admin/login');
   };
 
@@ -112,7 +117,7 @@ export default function AdminComplaints() {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <p className="text-sm font-bold text-blue-950">Consultor Autorizado</p>
-            <p className="text-xs text-gray-400">{adminEmail}</p>
+            <p className="text-xs text-gray-400">{adminPhone}</p>
           </div>
           <button 
             onClick={handleLogout}

@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Phone, ShieldCheck, AlertCircle, ArrowRight } from 'lucide-react';
+import { Lock, ShieldCheck, AlertCircle, ArrowRight, MessageSquare } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
@@ -14,28 +14,42 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) return;
+    if (!phoneNumber.trim()) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await apiService.adminLogin({ email, password });
-      if (response.ok) {
-        localStorage.setItem('admin_email', email);
-        navigate('/admin/dashboard');
-      } else {
-        setError(response.message || 'Credenciais inválidas.');
-      }
+      await apiService.sendAdminOtp(phoneNumber);
+      setStep('otp');
     } catch (err: any) {
-      setError(err.message || 'Erro ao realizar login. Tente novamente.');
+      setError(err.message || 'Erro ao enviar código. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp.trim()) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await apiService.verifyAdminOtp(phoneNumber, otp);
+      localStorage.setItem('admin_phone', phoneNumber);
+      navigate('/admin/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Erro ao validar código. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -63,44 +77,96 @@ export default function AdminLogin() {
         </div>
 
         <Card className="p-10 rounded-[3rem] shadow-2xl border-none bg-white/95 backdrop-blur-md">
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold text-blue-950">Acesso Restrito</h2>
-              <p className="text-sm text-gray-500">Insira suas credenciais para aceder ao painel de controlo.</p>
-            </div>
+          <AnimatePresence mode="wait">
+            {step === 'phone' ? (
+              <motion.form
+                key="phone-step"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                onSubmit={handleSendOtp}
+                className="space-y-6"
+              >
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold text-blue-950">Acesso por WhatsApp</h2>
+                  <p className="text-sm text-gray-500">Insira o seu número de telefone para receber o código de acesso.</p>
+                </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex items-center gap-3 text-red-600 text-sm">
-                <AlertCircle className="w-5 h-5 shrink-0" />
-                {error}
-              </div>
+                {error && (
+                  <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex items-center gap-3 text-red-600 text-sm">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    {error}
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <Input 
+                    label="Número de Telefone" 
+                    type="tel"
+                    placeholder="+351 912 345 678"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    required
+                    autoFocus
+                  />
+                </div>
+
+                <Button type="submit" className="w-full h-12" isLoading={isLoading}>
+                  Enviar Código <MessageSquare className="ml-2 w-4 h-4" />
+                </Button>
+              </motion.form>
+            ) : (
+              <motion.form
+                key="otp-step"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                onSubmit={handleVerifyOtp}
+                className="space-y-6"
+              >
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold text-blue-950">Validar Código</h2>
+                  <p className="text-sm text-gray-500">Enviamos um código de 6 dígitos para o seu WhatsApp.</p>
+                </div>
+
+                {error && (
+                  <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex items-center gap-3 text-red-600 text-sm">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    {error}
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <Input 
+                    label="Código de Acesso" 
+                    type="text"
+                    placeholder="000000"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    required
+                    autoFocus
+                    maxLength={6}
+                    className="text-center text-2xl tracking-[0.5em] font-mono"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Button type="submit" className="w-full h-12" isLoading={isLoading}>
+                    Confirmar Acesso <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    className="w-full text-gray-500"
+                    onClick={() => setStep('phone')}
+                    disabled={isLoading}
+                  >
+                    Alterar número
+                  </Button>
+                </div>
+              </motion.form>
             )}
-
-            <div className="space-y-4">
-              <Input 
-                label="Email" 
-                type="email"
-                placeholder="admin@exemplo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoFocus
-              />
-
-              <Input 
-                label="Palavra-passe" 
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button type="submit" className="w-full h-12" isLoading={isLoading}>
-              Entrar no Painel <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </form>
+          </AnimatePresence>
         </Card>
 
         <div className="flex items-center justify-center gap-2 text-blue-100/40 text-xs">

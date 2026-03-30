@@ -39,7 +39,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'leads' | 'pedidos' | 'reclamacoes'>('pedidos');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const adminEmail = localStorage.getItem('admin_email');
+  const adminPhone = localStorage.getItem('admin_phone');
   const activeStatuses = ['pendente', 'em_processamento', 'aguardando_pagamento', 'novo'];
 
   useEffect(() => {
@@ -67,8 +67,13 @@ export default function AdminDashboard() {
     fetchData();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_email');
+  const handleLogout = async () => {
+    try {
+      await apiService.logoutAdmin();
+    } catch (err) {
+      console.error('Erro ao fazer logout:', err);
+    }
+    localStorage.removeItem('admin_phone');
     navigate('/admin/login');
   };
 
@@ -158,7 +163,7 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <p className="text-sm font-bold text-blue-950">Consultor Autorizado</p>
-            <p className="text-xs text-gray-400">{adminEmail}</p>
+            <p className="text-xs text-gray-400">{adminPhone}</p>
           </div>
           <button 
             onClick={handleLogout}
@@ -470,8 +475,8 @@ export default function AdminDashboard() {
                   <h4 className="font-bold">Seu Perfil</h4>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs text-blue-100/60 uppercase tracking-widest font-bold">Email de Acesso</p>
-                  <p className="text-lg font-bold">{adminEmail}</p>
+                  <p className="text-xs text-blue-100/60 uppercase tracking-widest font-bold">Telefone de Acesso</p>
+                  <p className="text-lg font-bold">{adminPhone}</p>
                 </div>
                 <div className="pt-4 border-t border-white/10">
                   <p className="text-xs text-blue-100/60 leading-relaxed">

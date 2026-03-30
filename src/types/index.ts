@@ -146,13 +146,14 @@ export interface AdminSalesStats {
   totalSales: number;
   totalRevenue: number;
   averageTicket: number;
+  monthlySales: number;
 }
 
 export interface AdminSale {
   id: string;
-  clientName: string;
-  productName: string;
-  amount: number;
+  cliente: string;
+  produto: string;
+  valor: number;
   status: string;
   createdAt: string;
 }

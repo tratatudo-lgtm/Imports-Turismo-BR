@@ -35,7 +35,7 @@ export default function AdminOrders() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
 
-  const adminEmail = localStorage.getItem('admin_email');
+  const adminPhone = localStorage.getItem('admin_phone');
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -61,8 +61,13 @@ export default function AdminOrders() {
     fetchOrders();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_email');
+  const handleLogout = async () => {
+    try {
+      await apiService.logoutAdmin();
+    } catch (err) {
+      console.error('Erro ao fazer logout:', err);
+    }
+    localStorage.removeItem('admin_phone');
     navigate('/admin/login');
   };
 
@@ -115,7 +120,7 @@ export default function AdminOrders() {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <p className="text-sm font-bold text-blue-950">Consultor Autorizado</p>
-            <p className="text-xs text-gray-400">{adminEmail}</p>
+            <p className="text-xs text-gray-400">{adminPhone}</p>
           </div>
           <button 
             onClick={handleLogout}

@@ -17,6 +17,7 @@ import Cookies from './pages/Cookies';
 import Contacts from './pages/Contacts';
 import SupportCenter from './pages/SupportCenter';
 import AdminLogin from './pages/admin/Login';
+import { ProtectedRoute as AdminProtectedRoute } from './components/admin/ProtectedRoute';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminCRM from './pages/admin/CRM';
 import AdminCustomerDetail from './pages/admin/CustomerDetail';
@@ -53,12 +54,12 @@ export default function App() {
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/crm" element={<AdminCRM />} />
-          <Route path="/admin/crm/:id" element={<AdminCustomerDetail />} />
-          <Route path="/admin/pedidos" element={<AdminOrders />} />
-          <Route path="/admin/reclamacoes" element={<AdminComplaints />} />
-          <Route path="/admin/vendas" element={<AdminSales />} />
+          <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+          <Route path="/admin/crm" element={<AdminProtectedRoute><AdminCRM /></AdminProtectedRoute>} />
+          <Route path="/admin/crm/:id" element={<AdminProtectedRoute><AdminCustomerDetail /></AdminProtectedRoute>} />
+          <Route path="/admin/pedidos" element={<AdminProtectedRoute><AdminOrders /></AdminProtectedRoute>} />
+          <Route path="/admin/reclamacoes" element={<AdminProtectedRoute><AdminComplaints /></AdminProtectedRoute>} />
+          <Route path="/admin/vendas" element={<AdminProtectedRoute><AdminSales /></AdminProtectedRoute>} />
 
           {/* Client Routes */}
           <Route path="/cliente/login" element={<ClientLogin />} />

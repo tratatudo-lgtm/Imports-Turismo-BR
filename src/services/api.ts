@@ -24,7 +24,8 @@ import {
   AdminTicketStats,
   AdminClient,
   AdminSale,
-  AdminSalesStats
+  AdminSalesStats,
+  AdminSession
 } from '../types';
 
 const PUBLIC_API_BASE_URL = 'https://api.tratatudo.pt/api/public';
@@ -107,23 +108,23 @@ export const apiService = {
     }),
 
   // Admin Auth (using privateFetcher)
-  adminLogin: (data: any) =>
-    privateFetcher<{ ok: boolean; message?: string }>('/admin/auth/login', {
+  sendAdminOtp: (phoneNumber: string) =>
+    privateFetcher<OtpResponse>('/admin/auth/send-otp', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify({ phone_e164: phoneNumber })
     }),
 
-  requestOtp: (phoneNumber: string) => 
-    privateFetcher<OtpResponse>('/auth/send-otp', { 
-      method: 'POST', 
-      body: JSON.stringify({ phone_e164: phoneNumber }) 
+  verifyAdminOtp: (phoneNumber: string, otp: string) =>
+    privateFetcher<VerifyOtpResponse>('/admin/auth/verify-otp', {
+      method: 'POST',
+      body: JSON.stringify({ phone_e164: phoneNumber, code: otp })
     }),
-  
-  verifyOtp: (phoneNumber: string, otp: string) => 
-    privateFetcher<VerifyOtpResponse>('/auth/verify-otp', { 
-      method: 'POST', 
-      body: JSON.stringify({ phone_e164: phoneNumber, code: otp }) 
-    }),
+
+  getAdminSession: () =>
+    privateFetcher<AdminSession>('/admin/auth/session'),
+
+  logoutAdmin: () =>
+    privateFetcher<any>('/admin/auth/logout', { method: 'POST' }),
 
   // Admin Dashboard (Session-based)
   getAdminTickets: () => 
