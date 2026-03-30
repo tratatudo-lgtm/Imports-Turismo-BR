@@ -7,6 +7,7 @@ import { ReactNode, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
+import { ChatWidget } from './chat/ChatWidget';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface LayoutProps {
@@ -41,6 +42,7 @@ export const Layout = ({ children }: LayoutProps) => {
         </AnimatePresence>
       </main>
       {!isAuthPage && <Footer />}
+      {!isAuthPage && <ChatWidget />}
     </div>
   );
 };

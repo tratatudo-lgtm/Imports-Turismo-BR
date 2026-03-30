@@ -11,6 +11,11 @@ import QuoteRequestPage from './pages/QuoteRequest';
 import Booking from './pages/Booking';
 import Support from './pages/Support';
 import TrackRequest from './pages/TrackRequest';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import Cookies from './pages/Cookies';
+import Contacts from './pages/Contacts';
+import SupportCenter from './pages/SupportCenter';
 import AdminLogin from './pages/admin/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminCRM from './pages/admin/CRM';
@@ -39,6 +44,11 @@ export default function App() {
           <Route path="/reservas" element={<Booking />} />
           <Route path="/apoio" element={<Support />} />
           <Route path="/acompanhar" element={<TrackRequest />} />
+          <Route path="/termos" element={<Terms />} />
+          <Route path="/privacidade" element={<Privacy />} />
+          <Route path="/cookies" element={<Cookies />} />
+          <Route path="/contactos" element={<Contacts />} />
+          <Route path="/centro-apoio" element={<SupportCenter />} />
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />

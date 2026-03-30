@@ -26,54 +26,70 @@ export default function Home() {
   return (
     <div className="space-y-24">
       {/* Hero Section */}
-      <section className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-blue-950">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-blue-950 pt-20">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://picsum.photos/seed/travel/1920/1080?blur=2" 
             alt="Travel Hero" 
-            className="w-full h-full object-cover opacity-40"
+            className="w-full h-full object-cover opacity-30 scale-105"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-950/60 via-transparent to-blue-950/90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-950/80 via-blue-950/40 to-blue-950" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-12">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-4"
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="space-y-6"
           >
-            <span className="inline-block px-4 py-1.5 bg-amber-500/20 text-amber-400 rounded-full text-xs font-bold uppercase tracking-widest border border-amber-500/30">
+            <motion.span 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 }}
+              className="inline-block px-6 py-2 bg-amber-500/10 text-amber-400 rounded-full text-xs font-black uppercase tracking-[0.2em] border border-amber-500/20 backdrop-blur-sm"
+            >
               Sua Próxima Aventura Começa Aqui
-            </span>
-            <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-[1.1]">
+            </motion.span>
+            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] drop-shadow-2xl">
               Explore o Mundo com <br/>
-              <span className="text-amber-500">Exclusividade e Confiança</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Exclusividade</span>
             </h1>
-            <p className="text-xl text-blue-100/80 max-w-2xl mx-auto font-light leading-relaxed">
+            <p className="text-xl md:text-2xl text-blue-100/60 max-w-3xl mx-auto font-medium leading-relaxed tracking-tight">
               Atendimento personalizado para transformar seus sonhos de viagem em memórias inesquecíveis. Do Brasil para o mundo, cuidamos de cada detalhe.
             </p>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.8 }}
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
           >
-            <Link to="/orcamento">
-              <Button size="lg" className="w-full sm:w-auto shadow-xl shadow-blue-600/20">
-                Solicitar Orçamento <ArrowRight className="ml-2 w-5 h-5" />
+            <Link to="/orcamento" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto h-16 px-12 text-xl rounded-2xl shadow-2xl shadow-blue-600/40">
+                Solicitar Orçamento <ArrowRight className="ml-2 w-6 h-6" />
               </Button>
             </Link>
-            <Link to="/destinos">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10">
+            <Link to="/destinos" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-16 px-12 text-xl rounded-2xl border-white/20 text-white hover:bg-white/10 backdrop-blur-md">
                 Ver Destinos
               </Button>
             </Link>
           </motion.div>
         </div>
+
+        {/* Scroll Indicator */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 1 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        >
+          <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Scroll</span>
+          <div className="w-px h-12 bg-gradient-to-b from-amber-500 to-transparent" />
+        </motion.div>
       </section>
 
       {/* Benefits Section */}
