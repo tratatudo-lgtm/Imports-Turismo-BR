@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Base Entities
 export interface Lead {
   id?: string;
   nome: string;
@@ -23,7 +24,7 @@ export interface QuoteRequest {
   criancas: number;
   cidadePartida: string;
   observacoes?: string;
-  status?: 'pendente' | 'em_analise' | 'concluido';
+  status?: string;
   trackingCode?: string;
   createdAt?: string;
 }
@@ -39,7 +40,7 @@ export interface BookingRequest {
   criancas: number;
   cidadePartida: string;
   observacoes?: string;
-  status?: 'pendente' | 'confirmado' | 'cancelado';
+  status?: string;
   trackingCode?: string;
   createdAt?: string;
 }
@@ -63,8 +64,31 @@ export interface ComplaintRequest {
   nome: string;
   telefone: string;
   email: string;
-  status?: 'pendente' | 'em_analise' | 'resolvido';
+  status?: string;
   createdAt?: string;
+}
+
+// API Responses
+export interface TrackingResponse {
+  trackingCode: string;
+  status: string;
+  nome?: string;
+  destino?: string;
+  periodo?: string;
+  createdAt?: string;
+  historico?: Array<{
+    status: string;
+    mensagem: string;
+    data: string;
+  }>;
+}
+
+export interface OtpResponse {
+  message: string;
+}
+
+export interface VerifyOtpResponse {
+  token: string;
 }
 
 export interface DashboardStats {
@@ -72,7 +96,7 @@ export interface DashboardStats {
   totalPedidos: number;
   totalReclamacoes: number;
   recentLeads: Lead[];
-  recentPedidos: (QuoteRequest | BookingRequest)[];
+  recentPedidos: QuoteRequest[];
   recentReclamacoes: ComplaintRequest[];
 }
 

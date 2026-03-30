@@ -118,15 +118,14 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total de Leads</p>
-                  <h3 className="text-3xl font-bold text-blue-950">{stats?.totalLeads || 0}</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">{stats?.totalLeads ?? '-'}</h3>
                 </div>
                 <div className="bg-blue-50 p-3 rounded-2xl">
                   <Users className="text-blue-600 w-6 h-6" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2 text-green-500 text-xs font-bold">
-                <TrendingUp className="w-4 h-4" />
-                <span>+12% este mês</span>
+              <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
+                <span>Dados acumulados</span>
               </div>
             </Card>
           </motion.div>
@@ -136,15 +135,14 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Pedidos Ativos</p>
-                  <h3 className="text-3xl font-bold text-blue-950">{stats?.totalPedidos || 0}</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">{stats?.totalPedidos ?? '-'}</h3>
                 </div>
                 <div className="bg-amber-50 p-3 rounded-2xl">
                   <ShoppingBag className="text-amber-600 w-6 h-6" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2 text-amber-500 text-xs font-bold">
-                <Clock className="w-4 h-4" />
-                <span>5 aguardando triagem</span>
+              <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
+                <span>Aguardando processamento</span>
               </div>
             </Card>
           </motion.div>
@@ -154,15 +152,14 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Reclamações</p>
-                  <h3 className="text-3xl font-bold text-blue-950">{stats?.totalReclamacoes || 0}</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">{stats?.totalReclamacoes ?? '-'}</h3>
                 </div>
                 <div className="bg-red-50 p-3 rounded-2xl">
                   <AlertTriangle className="text-red-600 w-6 h-6" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2 text-red-500 text-xs font-bold">
-                <AlertTriangle className="w-4 h-4" />
-                <span>2 urgentes</span>
+              <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
+                <span>Pendentes de resolução</span>
               </div>
             </Card>
           </motion.div>
@@ -172,15 +169,14 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Taxa de Conversão</p>
-                  <h3 className="text-3xl font-bold text-blue-950">24%</h3>
+                  <h3 className="text-3xl font-bold text-blue-950">-</h3>
                 </div>
                 <div className="bg-green-50 p-3 rounded-2xl">
                   <CheckCircle2 className="text-green-600 w-6 h-6" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2 text-green-500 text-xs font-bold">
-                <TrendingUp className="w-4 h-4" />
-                <span>+5% vs mês anterior</span>
+              <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs font-bold">
+                <span>Cálculo em processamento</span>
               </div>
             </Card>
           </motion.div>
@@ -289,6 +285,41 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 text-xs text-gray-400">
                           {new Date(lead.createdAt || '').toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                            <MoreHorizontal className="w-5 h-5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {activeTab === 'reclamacoes' && stats?.recentReclamacoes.map((reclamacao, i) => (
+                      <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 font-bold">
+                              {reclamacao.nome.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-blue-950">{reclamacao.nome}</p>
+                              <p className="text-xs text-gray-400">{reclamacao.telefone}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-medium text-gray-600 truncate max-w-xs">{reclamacao.descricao}</p>
+                          <p className="text-xs text-gray-400 font-mono">{reclamacao.referencia}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={cn(
+                            "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                            reclamacao.status === 'pendente' ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
+                          )}>
+                            {reclamacao.status || 'pendente'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-gray-400">
+                          {new Date(reclamacao.createdAt || '').toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">

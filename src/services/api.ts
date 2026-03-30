@@ -9,7 +9,10 @@ import {
   BookingRequest, 
   ContactRequest, 
   ComplaintRequest, 
-  DashboardStats 
+  DashboardStats,
+  TrackingResponse,
+  OtpResponse,
+  VerifyOtpResponse
 } from '../types';
 
 const API_BASE_URL = 'https://api.tratatudo.pt/api/imports-turismo';
@@ -34,29 +37,29 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
 export const apiService = {
   // Public Endpoints
   createLead: (data: Lead) => 
-    fetcher('/leads', { method: 'POST', body: JSON.stringify(data) }),
+    fetcher<Lead>('/leads', { method: 'POST', body: JSON.stringify(data) }),
   
   createQuote: (data: QuoteRequest) => 
-    fetcher('/orcamentos', { method: 'POST', body: JSON.stringify(data) }),
+    fetcher<{ trackingCode: string }>('/orcamentos', { method: 'POST', body: JSON.stringify(data) }),
   
   createBooking: (data: BookingRequest) => 
-    fetcher('/reservas', { method: 'POST', body: JSON.stringify(data) }),
+    fetcher<{ trackingCode: string }>('/reservas', { method: 'POST', body: JSON.stringify(data) }),
   
   createContact: (data: ContactRequest) => 
-    fetcher('/contactos', { method: 'POST', body: JSON.stringify(data) }),
+    fetcher<ContactRequest>('/contactos', { method: 'POST', body: JSON.stringify(data) }),
   
   createComplaint: (data: ComplaintRequest) => 
-    fetcher('/reclamacoes', { method: 'POST', body: JSON.stringify(data) }),
+    fetcher<ComplaintRequest>('/reclamacoes', { method: 'POST', body: JSON.stringify(data) }),
   
   trackRequest: (trackingCode: string) => 
-    fetcher<any>(`/pedidos/${trackingCode}`),
+    fetcher<TrackingResponse>(`/pedidos/${trackingCode}`),
 
   // Admin Auth
   requestOtp: (phoneNumber: string) => 
-    fetcher('/admin/request-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
+    fetcher<OtpResponse>('/admin/request-otp', { method: 'POST', body: JSON.stringify({ phoneNumber }) }),
   
   verifyOtp: (phoneNumber: string, otp: string) => 
-    fetcher<{ token: string }>('/admin/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
+    fetcher<VerifyOtpResponse>('/admin/verify-otp', { method: 'POST', body: JSON.stringify({ phoneNumber, otp }) }),
 
   // Admin Dashboard (requires token)
   getDashboard: (token: string) => 
@@ -70,7 +73,7 @@ export const apiService = {
     }),
   
   getPedidos: (token: string) => 
-    fetcher<(QuoteRequest | BookingRequest)[]>('/admin/pedidos', { 
+    fetcher<QuoteRequest[]>('/admin/pedidos', { 
       headers: { Authorization: `Bearer ${token}` } 
     }),
   

@@ -11,12 +11,12 @@ import { Input } from '../components/ui/Input';
 import { motion } from 'motion/react';
 
 const destinations = [
-  { id: 1, name: 'Maldivas', price: 'R$ 12.500', image: 'https://picsum.photos/seed/maldives/800/600', category: 'Internacional', tag: 'Luxo' },
-  { id: 2, name: 'Paris, França', price: 'R$ 8.900', image: 'https://picsum.photos/seed/paris/800/600', category: 'Internacional', tag: 'Romântico' },
-  { id: 3, name: 'Fernando de Noronha', price: 'R$ 4.200', image: 'https://picsum.photos/seed/noronha/800/600', category: 'Nacional', tag: 'Natureza' },
-  { id: 4, name: 'Tóquio, Japão', price: 'R$ 15.400', image: 'https://picsum.photos/seed/tokyo/800/600', category: 'Internacional', tag: 'Cultura' },
-  { id: 5, name: 'Gramado, RS', price: 'R$ 2.800', image: 'https://picsum.photos/seed/gramado/800/600', category: 'Nacional', tag: 'Inverno' },
-  { id: 6, name: 'Roma, Itália', price: 'R$ 9.200', image: 'https://picsum.photos/seed/rome/800/600', category: 'Internacional', tag: 'História' },
+  { id: 1, name: 'Maldivas', image: 'https://picsum.photos/seed/maldives/800/600', category: 'Internacional', tag: 'Exótico' },
+  { id: 2, name: 'Paris, França', image: 'https://picsum.photos/seed/paris/800/600', category: 'Internacional', tag: 'Cultura' },
+  { id: 3, name: 'Fernando de Noronha', image: 'https://picsum.photos/seed/noronha/800/600', category: 'Nacional', tag: 'Brasil' },
+  { id: 4, name: 'Tóquio, Japão', image: 'https://picsum.photos/seed/tokyo/800/600', category: 'Internacional', tag: 'Tecnologia' },
+  { id: 5, name: 'Gramado, RS', image: 'https://picsum.photos/seed/gramado/800/600', category: 'Nacional', tag: 'Serra' },
+  { id: 6, name: 'Roma, Itália', image: 'https://picsum.photos/seed/rome/800/600', category: 'Internacional', tag: 'História' },
 ];
 
 export default function Destinations() {
@@ -117,12 +117,12 @@ export default function Destinations() {
                   </div>
                   <div className="flex items-center justify-between pt-4 border-t border-gray-50">
                     <div>
-                      <p className="text-gray-400 text-xs uppercase tracking-widest font-bold">A partir de</p>
-                      <p className="text-2xl font-bold text-blue-600">{dest.price}</p>
+                      <p className="text-gray-400 text-xs uppercase tracking-widest font-bold">Categoria</p>
+                      <p className="text-lg font-bold text-blue-600">{dest.category}</p>
                     </div>
                     <Link to="/orcamento">
                       <Button size="sm" className="rounded-full group/btn">
-                        Detalhes <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                        Solicitar Orçamento <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                       </Button>
                     </Link>
                   </div>

@@ -12,6 +12,7 @@ import { Card } from '../components/ui/Card';
 import { apiService } from '../services/api';
 import { ComplaintRequest } from '../types';
 import { motion } from 'motion/react';
+import { siteConfig } from '../config/site';
 
 export default function Support() {
   const navigate = useNavigate();
@@ -63,13 +64,13 @@ export default function Support() {
           </div>
           <h1 className="text-3xl font-bold text-blue-950">Reclamação Registada</h1>
           <p className="text-gray-600 leading-relaxed">
-            Sua reclamação foi registada com sucesso. Nossa equipe de apoio ao cliente entrará em contacto num prazo máximo de 24 horas úteis para resolver a situação.
+            A sua reclamação foi registada com sucesso. A nossa equipa de apoio ao cliente irá analisar o seu caso e entrará em contacto assim que possível.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Button className="w-full" onClick={() => navigate('/')}>
               Voltar ao Início
             </Button>
-            <Button variant="outline" className="w-full" onClick={() => window.open('https://wa.me/5511999999999', '_blank')}>
+            <Button variant="outline" className="w-full" onClick={() => window.open(`https://wa.me/${siteConfig.whatsapp}`, '_blank')}>
               Falar no WhatsApp
             </Button>
           </div>
@@ -96,7 +97,7 @@ export default function Support() {
               <span className="text-blue-600">Apoio ao Cliente</span>
             </h1>
             <p className="text-gray-500 leading-relaxed">
-              Estamos aqui para garantir que sua experiência seja perfeita. Se algo não saiu como esperado, conte-nos para que possamos resolver imediatamente.
+              Estamos aqui para garantir que sua experiência seja positiva. Se algo não saiu como esperado, conte-nos para que possamos analisar a situação.
             </p>
             
             <div className="space-y-6 pt-8">
@@ -105,8 +106,8 @@ export default function Support() {
                   <Phone className="text-green-600 w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">WhatsApp 24/7</p>
-                  <p className="font-bold text-blue-950">+55 (11) 99999-9999</p>
+                  <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">WhatsApp</p>
+                  <p className="font-bold text-blue-950">{siteConfig.whatsappFormatted}</p>
                 </div>
               </div>
 
@@ -116,7 +117,7 @@ export default function Support() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">E-mail de Suporte</p>
-                  <p className="font-bold text-blue-950">apoio@importsturismo.com.br</p>
+                  <p className="font-bold text-blue-950">{siteConfig.supportEmail}</p>
                 </div>
               </div>
 
@@ -125,8 +126,8 @@ export default function Support() {
                   <MessageSquare className="text-white w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Chat Online</p>
-                  <p className="font-bold text-blue-950">Atendimento em Tempo Real</p>
+                  <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Apoio</p>
+                  <p className="font-bold text-blue-950">Análise Especializada</p>
                 </div>
               </div>
             </div>

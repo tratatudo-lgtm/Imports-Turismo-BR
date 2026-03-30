@@ -68,13 +68,13 @@ export default function QuoteRequestPage() {
           <div className="bg-green-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
             <CheckCircle2 className="text-green-500 w-10 h-10" />
           </div>
-          <h1 className="text-3xl font-bold text-blue-950">Pedido Recebido com Sucesso!</h1>
+          <h1 className="text-3xl font-bold text-blue-950">Pedido Recebido</h1>
           <p className="text-gray-600 leading-relaxed">
-            Obrigado, <span className="font-bold text-blue-600">{formData.nome}</span>! Nossa equipe de especialistas já foi notificada e entrará em contacto em breve com as melhores opções para sua viagem.
+            Olá, <span className="font-bold text-blue-600">{formData.nome}</span>. Recebemos a sua solicitação de orçamento. O seu pedido será analisado pela nossa equipa técnica.
           </p>
           
           <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 space-y-2">
-            <p className="text-xs text-blue-400 uppercase tracking-widest font-bold">Código de Acompanhamento</p>
+            <p className="text-xs text-blue-400 uppercase tracking-widest font-bold">Referência do Pedido</p>
             <p className="text-2xl font-mono font-bold text-blue-900 tracking-wider">{trackingCode}</p>
           </div>
 

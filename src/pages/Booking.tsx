@@ -68,13 +68,13 @@ export default function Booking() {
           <div className="bg-green-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
             <CheckCircle2 className="text-green-500 w-10 h-10" />
           </div>
-          <h1 className="text-3xl font-bold text-blue-950">Reserva Registada!</h1>
+          <h1 className="text-3xl font-bold text-blue-950">Solicitação Registada</h1>
           <p className="text-gray-600 leading-relaxed">
-            Sua solicitação de reserva foi registada com sucesso. Nossa equipe entrará em contacto para confirmar a disponibilidade e finalizar o pagamento.
+            A sua solicitação de reserva foi registada. A nossa equipa irá analisar o pedido e entrará em contacto para tratar dos próximos passos.
           </p>
           
           <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 space-y-2">
-            <p className="text-xs text-blue-400 uppercase tracking-widest font-bold">Código de Acompanhamento</p>
+            <p className="text-xs text-blue-400 uppercase tracking-widest font-bold">Referência da Solicitação</p>
             <p className="text-2xl font-mono font-bold text-blue-900 tracking-wider">{trackingCode}</p>
           </div>
 

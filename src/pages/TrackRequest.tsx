@@ -11,12 +11,14 @@ import { Card } from '../components/ui/Card';
 import { apiService } from '../services/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { TrackingResponse } from '../types';
+import { siteConfig } from '../config/site';
 
 export default function TrackRequest() {
   const [trackingCode, setTrackingCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<TrackingResponse | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +61,7 @@ export default function TrackRequest() {
         </motion.div>
         <h1 className="text-4xl font-bold text-blue-950 tracking-tight">Acompanhe seu Pedido</h1>
         <p className="text-gray-500 max-w-xl mx-auto">
-          Insira o código de acompanhamento enviado para o seu e-mail ou WhatsApp para verificar o estado atual da sua solicitação.
+          Insira o código de acompanhamento para verificar o estado atual da sua solicitação.
         </p>
       </div>
 
@@ -75,7 +77,7 @@ export default function TrackRequest() {
             />
           </div>
           <Button type="submit" size="lg" className="h-14 px-10" isLoading={isLoading}>
-            Consultar Estado
+            Consultar
           </Button>
         </form>
 
@@ -101,7 +103,7 @@ export default function TrackRequest() {
             >
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-100 pb-8">
                 <div className="space-y-1">
-                  <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Código do Pedido</p>
+                  <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Referência</p>
                   <h2 className="text-3xl font-mono font-bold text-blue-950">{result.trackingCode}</h2>
                 </div>
                 <div className={cn("px-6 py-2 rounded-full border text-sm font-bold uppercase tracking-wider", getStatusColor(result.status))}>
@@ -110,38 +112,46 @@ export default function TrackRequest() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-400 text-xs uppercase tracking-widest font-bold">
-                    <User className="w-4 h-4" /> Passageiro
+                {result.nome && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-gray-400 text-xs uppercase tracking-widest font-bold">
+                      <User className="w-4 h-4" /> Nome
+                    </div>
+                    <p className="text-lg font-semibold text-blue-950">{result.nome}</p>
                   </div>
-                  <p className="text-lg font-semibold text-blue-950">{result.nome}</p>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-400 text-xs uppercase tracking-widest font-bold">
-                    <MapPin className="w-4 h-4" /> Destino
+                )}
+                {result.destino && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-gray-400 text-xs uppercase tracking-widest font-bold">
+                      <MapPin className="w-4 h-4" /> Destino
+                    </div>
+                    <p className="text-lg font-semibold text-blue-950">{result.destino}</p>
                   </div>
-                  <p className="text-lg font-semibold text-blue-950">{result.destino}</p>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-400 text-xs uppercase tracking-widest font-bold">
-                    <Calendar className="w-4 h-4" /> Período
+                )}
+                {result.periodo && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-gray-400 text-xs uppercase tracking-widest font-bold">
+                      <Calendar className="w-4 h-4" /> Período
+                    </div>
+                    <p className="text-lg font-semibold text-blue-950">{result.periodo}</p>
                   </div>
-                  <p className="text-lg font-semibold text-blue-950">{result.periodo}</p>
-                </div>
+                )}
               </div>
 
-              {/* Timeline */}
+              {/* Timeline - Simplified and Robust */}
               <div className="pt-8 space-y-6">
-                <h3 className="text-lg font-bold text-blue-950">Histórico do Pedido</h3>
+                <h3 className="text-lg font-bold text-blue-950">Estado da Solicitação</h3>
                 <div className="space-y-8 relative before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
                   <div className="relative pl-12">
                     <div className="absolute left-0 top-1 w-9 h-9 bg-green-500 rounded-full flex items-center justify-center border-4 border-white shadow-sm">
                       <CheckCircle2 className="text-white w-4 h-4" />
                     </div>
                     <div className="space-y-1">
-                      <p className="font-bold text-blue-950">Pedido Recebido</p>
-                      <p className="text-sm text-gray-500">Sua solicitação foi registada no nosso sistema e aguarda triagem.</p>
-                      <p className="text-xs text-gray-400 mt-2">{new Date(result.createdAt).toLocaleString()}</p>
+                      <p className="font-bold text-blue-950">Registada</p>
+                      <p className="text-sm text-gray-500">A solicitação foi registada no sistema.</p>
+                      {result.createdAt && (
+                        <p className="text-xs text-gray-400 mt-2">{new Date(result.createdAt).toLocaleString()}</p>
+                      )}
                     </div>
                   </div>
                   
@@ -154,7 +164,7 @@ export default function TrackRequest() {
                     </div>
                     <div className="space-y-1">
                       <p className={cn("font-bold", result.status !== 'pendente' ? "text-blue-950" : "text-gray-300")}>Em Análise</p>
-                      <p className="text-sm text-gray-500">Um consultor especialista está a verificar as melhores opções para o seu destino.</p>
+                      <p className="text-sm text-gray-500">A solicitação está a ser analisada pela equipa técnica.</p>
                     </div>
                   </div>
 
@@ -166,16 +176,16 @@ export default function TrackRequest() {
                       <CheckCircle2 className="text-white w-4 h-4" />
                     </div>
                     <div className="space-y-1">
-                      <p className={cn("font-bold", result.status === 'concluido' || result.status === 'confirmado' ? "text-blue-950" : "text-gray-300")}>Concluído</p>
-                      <p className="text-sm text-gray-500">O orçamento foi finalizado e enviado para o seu WhatsApp/E-mail.</p>
+                      <p className={cn("font-bold", result.status === 'concluido' || result.status === 'confirmado' ? "text-blue-950" : "text-gray-300")}>Finalizada</p>
+                      <p className="text-sm text-gray-500">O processo foi concluído.</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="pt-8 border-t border-gray-100 flex justify-center">
-                <Button variant="outline" onClick={() => window.open('https://wa.me/5511999999999', '_blank')}>
-                  Falar com Consultor sobre este Pedido
+                <Button variant="outline" onClick={() => window.open(`https://wa.me/${siteConfig.whatsapp}`, '_blank')}>
+                  Contactar Suporte
                 </Button>
               </div>
             </motion.div>
