@@ -34,6 +34,7 @@ export const Navbar = () => {
     { name: 'Orçamento', href: '/orcamento' },
     { name: 'Acompanhar', href: '/acompanhar' },
     { name: 'Apoio', href: '/apoio' },
+    { name: 'Área Cliente', href: '/cliente/login' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -77,15 +78,27 @@ export const Navbar = () => {
               {link.name}
             </Link>
           ))}
-          <Button 
-            variant={isScrolled ? "primary" : "secondary"} 
-            size="sm"
-            className="rounded-xl"
-            onClick={() => window.open(`https://wa.me/${siteConfig.whatsapp}`, '_blank')}
-          >
-            <Phone className="w-4 h-4 mr-2" />
-            WhatsApp
-          </Button>
+          
+          <div className="flex items-center gap-3 border-l border-white/10 pl-8 ml-2">
+            <Link 
+              to="/admin/login" 
+              className={cn(
+                "text-[10px] font-bold uppercase tracking-widest transition-colors",
+                isScrolled ? "text-blue-950/30 hover:text-blue-600" : "text-white/30 hover:text-white"
+              )}
+            >
+              Admin
+            </Link>
+            <Button 
+              variant={isScrolled ? "primary" : "secondary"} 
+              size="sm"
+              className="rounded-xl"
+              onClick={() => window.open(`https://wa.me/${siteConfig.whatsapp}`, '_blank')}
+            >
+              <Phone className="w-4 h-4 mr-2" />
+              WhatsApp
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Menu Button */}
@@ -139,6 +152,11 @@ export const Navbar = () => {
                 <Phone className="w-5 h-5 mr-2" />
                 WhatsApp Comercial
               </Button>
+              <Link to="/cliente/login" className="w-full">
+                <Button variant="outline" className="w-full h-14 rounded-2xl text-lg font-bold border-blue-100 text-blue-600">
+                  Entrar na Área Cliente
+                </Button>
+              </Link>
             </div>
           </motion.div>
         )}

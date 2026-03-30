@@ -47,7 +47,7 @@ export default function TicketDetail() {
           apiService.getTicketDetail(id),
           apiService.getTicketMessages(id).catch(() => []),
           apiService.getTicketHistory(id).catch(() => [])
-        ]);
+        ]) as [any, any, any, any];
 
         if (!sessionRes || !sessionRes.authenticated) {
           navigate('/cliente/login');
@@ -55,9 +55,15 @@ export default function TicketDetail() {
         }
 
         setSession(sessionRes);
-        setTicket(ticketRes?.ticket || ticketRes);
-        setMessages(messagesRes || []);
-        setHistory(historyRes || []);
+        setTicket(ticketRes?.ticket || ticketRes || null);
+        setMessages(
+          Array.isArray(messagesRes?.messages) ? messagesRes.messages :
+          Array.isArray(messagesRes) ? messagesRes : []
+        );
+        setHistory(
+          Array.isArray(historyRes?.history) ? historyRes.history :
+          Array.isArray(historyRes) ? historyRes : []
+        );
       } catch (err: any) {
         console.error('Error fetching ticket detail:', err);
         setError(err.message || 'Erro ao carregar os detalhes do pedido.');
@@ -185,7 +191,7 @@ export default function TicketDetail() {
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-4 h-4" />
-                      <span>Criado em {new Date(ticket.created_at).toLocaleDateString()}</span>
+                      <span>Criado em {(ticket.created_at || ticket.createdAt) ? new Date(ticket.created_at || ticket.createdAt).toLocaleDateString() : 'Data indisponível'}</span>
                     </div>
                     {ticket.metadata?.destination && (
                       <div className="flex items-center gap-1.5">
@@ -218,7 +224,7 @@ export default function TicketDetail() {
                 <h2 className="text-lg font-bold text-blue-950">Mensagens e Atualizações</h2>
               </div>
 
-              {messages.length === 0 ? (
+              {Array.isArray(messages) && messages.length === 0 ? (
                 <Card className="p-12 border-none shadow-sm flex flex-col items-center text-center space-y-4">
                   <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300">
                     <MessageSquare className="w-8 h-8" />
@@ -230,7 +236,7 @@ export default function TicketDetail() {
                 </Card>
               ) : (
                 <div className="space-y-4">
-                  {messages.map((msg, idx) => (
+                  {(Array.isArray(messages) ? messages : []).map((msg, idx) => (
                     <motion.div 
                       key={msg.id || idx}
                       initial={{ opacity: 0, y: 10 }}
@@ -249,7 +255,7 @@ export default function TicketDetail() {
                             {msg.is_staff ? 'Equipa Imports' : 'Você'}
                           </span>
                           <span className="text-[10px] text-gray-400 font-mono">
-                            {new Date(msg.created_at).toLocaleString()}
+                            {(msg.created_at || msg.createdAt) ? new Date(msg.created_at || msg.createdAt).toLocaleString() : ''}
                           </span>
                         </div>
                         <p className="text-sm text-gray-700 leading-relaxed">{msg.body || msg.content || msg.message}</p>
@@ -280,7 +286,7 @@ export default function TicketDetail() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Última Atualização</p>
-                  <p className="text-sm font-bold text-blue-950">{new Date(ticket.updated_at || ticket.created_at).toLocaleString()}</p>
+                  <p className="text-sm font-bold text-blue-950">{(ticket.updated_at || ticket.updatedAt || ticket.created_at || ticket.createdAt) ? new Date(ticket.updated_at || ticket.updatedAt || ticket.created_at || ticket.createdAt).toLocaleString() : 'N/A'}</p>
                 </div>
               </div>
             </Card>
@@ -292,13 +298,13 @@ export default function TicketDetail() {
                 <h2 className="text-lg font-bold text-blue-950">Histórico</h2>
               </div>
 
-              {history.length === 0 ? (
+              {Array.isArray(history) && history.length === 0 ? (
                 <Card className="p-6 border-none shadow-sm text-center">
                   <p className="text-xs text-gray-400">Sem histórico de estados registado.</p>
                 </Card>
               ) : (
                 <div className="relative pl-4 space-y-6 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
-                  {history.map((item, idx) => (
+                  {(Array.isArray(history) ? history : []).map((item, idx) => (
                     <div key={idx} className="relative">
                       <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-white border-2 border-blue-600" />
                       <div className="space-y-1">
@@ -307,7 +313,7 @@ export default function TicketDetail() {
                             {getStatusLabel(item.status)}
                           </span>
                           <span className="text-[10px] text-gray-400 font-mono">
-                            {new Date(item.created_at).toLocaleDateString()}
+                            {(item.created_at || item.createdAt) ? new Date(item.created_at || item.createdAt).toLocaleDateString() : ''}
                           </span>
                         </div>
                         {item.comment && (
