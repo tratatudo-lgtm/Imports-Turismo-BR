@@ -30,6 +30,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       headers["cookie"] = req.headers.cookie as string;
     }
 
+    // Special Rule: If it's the Global Admin requesting OTP, we try to bypass the tenant-only check
+    if (pathString === '/send-otp' && req.body && req.body.phone_e164 === GLOBAL_ADMIN_PHONE && !!GLOBAL_ADMIN_PHONE) {
+      delete headers["x-site-key"];
+    }
+
     // Unified Auth Proxy Logic
     const targetUrl = `${LEGACY_API_BASE_URL}/auth${pathString}${queryString ? `?${queryString}` : ''}`;
     

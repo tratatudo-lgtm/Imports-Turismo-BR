@@ -30,10 +30,10 @@ async function startServer() {
   const TRATATUDO_API_KEY = process.env.TRATATUDO_API_KEY;
   const LEGACY_API_BASE_URL = "https://api.tratatudo.pt/api";
   const SITE_KEY = "imports-turismo-br";
+  const GLOBAL_ADMIN_PHONE = process.env.GLOBAL_ADMIN_PHONE;
 
   /**
    * Universal Proxy Helper for Platform API (v1)
-   * Handles GET, POST, PATCH, PUT with secure Authorization header
    */
   const platformProxy = async (req: express.Request, res: express.Response, endpoint: string) => {
     if (!TRATATUDO_API_KEY) {
@@ -72,12 +72,13 @@ async function startServer() {
   };
 
   /**
-   * Admin Proxy Helper for Legacy/Admin API
-   * Handles session cookies and x-site-key context for the admin panel
+   * Unified Auth Proxy Helper
+   * Handles WhatsApp/OTP login for both Admin and Client.
+   * Implements special logic for Global Admin within the tenant scope.
    */
-  const adminProxy = async (req: express.Request, res: express.Response, endpoint: string) => {
+  const unifiedAuthProxy = async (req: express.Request, res: express.Response, endpoint: string) => {
     try {
-      const url = `${LEGACY_API_BASE_URL}${endpoint}`;
+      const url = `${LEGACY_API_BASE_URL}/auth${endpoint}`;
       const method = req.method;
       
       const headers: Record<string, string> = {
@@ -85,9 +86,16 @@ async function startServer() {
         "x-site-key": SITE_KEY,
       };
 
-      // Forward cookies from the client to the legacy API (critical for session)
+      // Forward cookies from the client to the legacy API
       if (req.headers.cookie) {
-        headers["cookie"] = req.headers.cookie;
+        headers["cookie"] = req.headers.cookie as string;
+      }
+
+      // Special Rule: If it's the Global Admin requesting OTP, we try to bypass the tenant-only check
+      // by removing the x-site-key header if the backend requires it for client association.
+      // This allows the Global Admin to receive OTP even if not explicitly a client of this tenant.
+      if (endpoint === '/send-otp' && req.body.phone_e164 === GLOBAL_ADMIN_PHONE && !!GLOBAL_ADMIN_PHONE) {
+        delete headers["x-site-key"];
       }
 
       const options: RequestInit = {
@@ -101,7 +109,7 @@ async function startServer() {
 
       const response = await fetch(url, options);
       
-      // Forward Set-Cookie headers from legacy API back to the client
+      // Forward Set-Cookie headers
       const setCookie = response.headers.get('set-cookie');
       if (setCookie) {
         res.setHeader('set-cookie', setCookie);
@@ -110,17 +118,35 @@ async function startServer() {
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        return res.status(response.status).json(data || { error: `Admin API error: ${response.statusText}` });
+        return res.status(response.status).json(data || { error: `Auth API error: ${response.statusText}` });
+      }
+
+      // Enrichment logic for Global Admin and Role Detection
+      if (endpoint === '/verify-otp' || endpoint === '/session') {
+        const phone = data.phone_e164 || (req.body && req.body.phone_e164);
+        const isGlobalAdmin = phone === GLOBAL_ADMIN_PHONE && !!GLOBAL_ADMIN_PHONE;
+
+        // If it's a session check and not authenticated, just return the original data
+        if (endpoint === '/session' && !data.authenticated) {
+          return res.json(data);
+        }
+
+        return res.json({
+          ...data,
+          can_act_as_admin: isGlobalAdmin || !!data.is_admin || !!data.is_consultant,
+          can_act_as_client: true, // Everyone can act as client in this context
+          is_global_admin: isGlobalAdmin
+        });
       }
 
       res.json(data);
     } catch (error: any) {
-      console.error(`[Admin Proxy] Error communicating with ${endpoint}:`, error);
-      res.status(500).json({ error: "Failed to communicate with Admin API." });
+      console.error(`[Unified Auth Proxy] Error communicating with /auth${endpoint}:`, error);
+      res.status(500).json({ error: "Failed to communicate with Auth API." });
     }
   };
 
-  // --- Platform API Proxy Routes (Internal) ---
+  // --- Platform API Proxy Routes ---
   app.get("/api/platform/client/profile", (req, res) => platformProxy(req, res, "/client/profile"));
   app.get("/api/platform/client/config", (req, res) => platformProxy(req, res, "/client/config"));
   app.get("/api/platform/dashboard/summary", (req, res) => platformProxy(req, res, "/dashboard/summary"));
@@ -129,11 +155,11 @@ async function startServer() {
   app.post("/api/platform/messages/send", (req, res) => platformProxy(req, res, "/messages/send"));
   app.post("/api/platform/travel/orders", (req, res) => platformProxy(req, res, "/travel/orders"));
 
-  // --- Admin Auth Proxy Routes (Internal) ---
-  app.post("/api/admin/auth/send-otp", (req, res) => adminProxy(req, res, "/admin/auth/send-otp"));
-  app.post("/api/admin/auth/verify-otp", (req, res) => adminProxy(req, res, "/admin/auth/verify-otp"));
-  app.get("/api/admin/auth/session", (req, res) => adminProxy(req, res, "/admin/auth/session"));
-  app.post("/api/admin/auth/logout", (req, res) => adminProxy(req, res, "/admin/auth/logout"));
+  // --- Unified Auth Proxy Routes ---
+  app.post("/api/auth/send-otp", (req, res) => unifiedAuthProxy(req, res, "/send-otp"));
+  app.post("/api/auth/verify-otp", (req, res) => unifiedAuthProxy(req, res, "/verify-otp"));
+  app.get("/api/auth/session", (req, res) => unifiedAuthProxy(req, res, "/session"));
+  app.post("/api/auth/logout", (req, res) => unifiedAuthProxy(req, res, "/logout"));
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
