@@ -36,7 +36,7 @@ const PRIVATE_API_BASE_URL = 'https://api.tratatudo.pt/api';
 const SITE_KEY = 'imports-turismo-br';
 
 async function baseFetcher<T>(baseUrl: string, endpoint: string, options?: RequestInit, appendSiteKey: boolean = false): Promise<T> {
-  const url = new URL(`${baseUrl}${endpoint}`);
+  const url = new URL(`${baseUrl}${endpoint}`, window.location.origin);
   
   // Append site_key to query params if requested
   if (appendSiteKey) {
@@ -88,6 +88,9 @@ const adminFetcher = <T>(endpoint: string, options?: RequestInit) => {
     }
   }, false);
 };
+
+const platformFetcher = <T>(endpoint: string, options?: RequestInit) =>
+  baseFetcher<T>('/api/platform', endpoint, options, false);
 
 export const apiService = {
   // Public Endpoints (using publicFetcher)
@@ -285,7 +288,7 @@ export const apiService = {
 
   // Client Area (Session-based)
   getClientDashboardStats: () => 
-    privateFetcher<{ ok: boolean; stats: any }>('/client/dashboard/stats'),
+    platformFetcher<any>('/dashboard'),
 
   getClientTickets: () => 
     privateFetcher<{ ok: boolean; tickets: any[] }>('/client/tickets'),
@@ -300,7 +303,7 @@ export const apiService = {
     privateFetcher<any[]>(`/client/tickets/${id}/history`),
   
   getClientPurchases: () => 
-    privateFetcher<{ ok: boolean; tickets: any[] }>('/client/tickets'),
+    platformFetcher<any>('/orders'),
   
   getClientDocuments: () => 
     privateFetcher<{ ok: boolean; documents: any[] }>('/client/documents'),
@@ -309,8 +312,8 @@ export const apiService = {
     privateFetcher<Blob>(`/client/documents/${id}/download`),
   
   getClientSupport: () => 
-    privateFetcher<{ ok: boolean; tickets: any[] }>('/client/tickets'),
+    platformFetcher<any>('/messages'),
   
   getClientProfile: () => 
-    privateFetcher<any>('/auth/session'),
+    platformFetcher<any>('/profile'),
 };
