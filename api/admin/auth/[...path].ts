@@ -6,11 +6,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Extract the path from the query parameters (Vercel catch-all)
   // path will be an array of strings
-  const { path } = req.query;
+  const { path, ...queryParams } = req.query;
   const pathString = Array.isArray(path) ? `/${path.join('/')}` : `/${path || ''}`;
 
   try {
-    const url = `${LEGACY_API_BASE_URL}/admin/auth${pathString}`;
+    // Construct URL with query parameters
+    const searchParams = new URLSearchParams();
+    Object.entries(queryParams).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach(v => searchParams.append(key, v));
+      } else if (value) {
+        searchParams.append(key, value);
+      }
+    });
+
+    const queryString = searchParams.toString();
+    const url = `${LEGACY_API_BASE_URL}/admin/auth${pathString}${queryString ? `?${queryString}` : ''}`;
     const method = req.method;
     
     const headers: Record<string, string> = {

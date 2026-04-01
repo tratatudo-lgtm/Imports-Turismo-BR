@@ -6,7 +6,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Extract the path from the query parameters (Vercel catch-all)
   // path will be an array of strings
-  const { path } = req.query;
+  const { path, ...queryParams } = req.query;
   const pathString = Array.isArray(path) ? `/${path.join('/')}` : `/${path || ''}`;
 
   if (!TRATATUDO_API_KEY) {
@@ -15,7 +15,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const url = `${TRATATUDO_API_URL}${pathString}`;
+    // Construct URL with query parameters
+    const searchParams = new URLSearchParams();
+    Object.entries(queryParams).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach(v => searchParams.append(key, v));
+      } else if (value) {
+        searchParams.append(key, value);
+      }
+    });
+
+    const queryString = searchParams.toString();
+    const url = `${TRATATUDO_API_URL}${pathString}${queryString ? `?${queryString}` : ''}`;
     const method = req.method;
     
     const options: RequestInit = {
