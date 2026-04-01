@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import 'dotenv/config';
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
@@ -17,40 +18,54 @@ async function startServer() {
 
   app.use(express.json());
 
-  // TrataTudo Platform API Proxy Routes
+  // TrataTudo Platform API Proxy
   const TRATATUDO_API_URL = process.env.TRATATUDO_API_URL || "https://platform-api.tratatudo.pt/v1";
   const TRATATUDO_API_KEY = process.env.TRATATUDO_API_KEY;
 
+  /**
+   * Universal Proxy Helper for Platform API
+   */
   const platformProxy = async (req: express.Request, res: express.Response, endpoint: string) => {
     if (!TRATATUDO_API_KEY) {
-      return res.status(500).json({ error: "TRATATUDO_API_KEY is not configured on the server." });
+      console.error("TRATATUDO_API_KEY is missing in environment variables.");
+      return res.status(500).json({ error: "Server configuration error: API Key missing." });
     }
 
     try {
-      const response = await fetch(`${TRATATUDO_API_URL}${endpoint}`, {
-        method: "GET",
+      const url = `${TRATATUDO_API_URL}${endpoint}`;
+      const method = req.method;
+      
+      const options: RequestInit = {
+        method,
         headers: {
           "Authorization": `Bearer ${TRATATUDO_API_KEY}`,
           "Content-Type": "application/json",
         },
-      });
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        return res.status(response.status).json(errorData || { error: `Platform API error: ${response.statusText}` });
+      if (['POST', 'PATCH', 'PUT'].includes(method)) {
+        options.body = JSON.stringify(req.body);
       }
 
-      const data = await response.json();
+      const response = await fetch(url, options);
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        return res.status(response.status).json(data || { error: `Platform API error: ${response.statusText}` });
+      }
+
       res.json(data);
     } catch (error: any) {
-      console.error(`Error proxying to ${endpoint}:`, error);
-      res.status(500).json({ error: "Internal server error while communicating with Platform API." });
+      console.error(`Error proxying to Platform API (${endpoint}):`, error);
+      res.status(500).json({ error: "Failed to communicate with Platform API." });
     }
   };
 
-  app.get("/api/platform/profile", (req, res) => platformProxy(req, res, "/client/profile"));
-  app.get("/api/platform/dashboard", (req, res) => platformProxy(req, res, "/dashboard/summary"));
-  app.get("/api/platform/orders", (req, res) => platformProxy(req, res, "/travel/orders"));
+  // Platform API Routes (Internal Proxy)
+  app.get("/api/platform/client/profile", (req, res) => platformProxy(req, res, "/client/profile"));
+  app.get("/api/platform/client/config", (req, res) => platformProxy(req, res, "/client/config"));
+  app.get("/api/platform/dashboard/summary", (req, res) => platformProxy(req, res, "/dashboard/summary"));
+  app.get("/api/platform/travel/orders", (req, res) => platformProxy(req, res, "/travel/orders"));
   app.get("/api/platform/messages", (req, res) => platformProxy(req, res, "/messages"));
 
   // Vite middleware for development
@@ -69,7 +84,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`[Imports-Turismo-BR] Server running on http://localhost:${PORT}`);
   });
 }
 

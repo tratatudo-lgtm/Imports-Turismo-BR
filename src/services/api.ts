@@ -286,9 +286,9 @@ export const apiService = {
   verifyMagicLink: (token: string) => 
     privateFetcher<ClientSession>('/auth/verify-magic-link', { method: 'POST', body: JSON.stringify({ token }) }),
 
-  // Client Area (Session-based)
+  // Client Area (Platform API Proxy)
   getClientDashboardStats: () => 
-    platformFetcher<any>('/dashboard'),
+    platformFetcher<any>('/dashboard/summary'),
 
   getClientTickets: () => 
     privateFetcher<{ ok: boolean; tickets: any[] }>('/client/tickets'),
@@ -303,7 +303,7 @@ export const apiService = {
     privateFetcher<any[]>(`/client/tickets/${id}/history`),
   
   getClientPurchases: () => 
-    platformFetcher<any>('/orders'),
+    platformFetcher<any>('/travel/orders'),
   
   getClientDocuments: () => 
     privateFetcher<{ ok: boolean; documents: any[] }>('/client/documents'),
@@ -315,5 +315,8 @@ export const apiService = {
     platformFetcher<any>('/messages'),
   
   getClientProfile: () => 
-    platformFetcher<any>('/profile'),
+    platformFetcher<any>('/client/profile'),
+
+  getClientConfig: () =>
+    platformFetcher<any>('/client/config'),
 };
