@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/platform/(.*)",
+      "destination": "/api/platform/$1"
+    },
+    {
+      "source": "/api/admin/auth/(.*)",
+      "destination": "/api/admin/auth/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
