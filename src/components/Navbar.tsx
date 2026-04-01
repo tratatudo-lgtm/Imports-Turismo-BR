@@ -62,12 +62,12 @@ export const Navbar = () => {
     { name: 'Orçamento', href: '/orcamento' },
     { name: 'Acompanhar', href: '/acompanhar' },
     { name: 'Apoio', href: '/apoio' },
-    { name: 'Área Cliente', href: '/cliente/login' },
+    { name: 'Área Cliente', href: '/login' },
   ];
 
   const mobileNavLinks = [
     ...navLinks,
-    { name: 'Área Admin', href: '/admin/login' },
+    { name: 'Área Admin', href: '/login' },
   ];
 
   const isActive = (path: string) => location.pathname === path;

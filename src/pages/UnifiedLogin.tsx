@@ -80,7 +80,7 @@ export default function UnifiedLogin() {
     setError(null);
 
     try {
-      const response = await apiService.verifyOtp(phoneNumber, otp);
+      const response = await apiService.verifyOtp(phoneNumber, otp, 26);
       
       if (response.can_act_as_admin && response.can_act_as_client) {
         setRoles({

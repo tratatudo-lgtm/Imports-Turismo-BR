@@ -28,7 +28,6 @@ import AdminSales from './pages/admin/Sales';
 import AdminTravelOrderDetail from './pages/admin/TravelOrderDetail';
 import AdminTravelPaymentDetail from './pages/admin/TravelPaymentDetail';
 
-import ClientLogin from './pages/client/Login';
 import MagicLinkCallback from './pages/client/MagicLinkCallback';
 import ClientDashboard from './pages/client/Dashboard';
 import ClientPurchases from './pages/client/Purchases';
@@ -71,7 +70,6 @@ export default function App() {
           <Route path="/admin/travel/payments/:id" element={<AdminProtectedRoute><AdminTravelPaymentDetail /></AdminProtectedRoute>} />
 
           {/* Client Routes */}
-          <Route path="/cliente/login" element={<UnifiedLogin />} />
           <Route path="/cliente/verify-magic-link" element={<MagicLinkCallback />} />
           <Route path="/cliente/dashboard" element={<ClientProtectedRoute><ClientDashboard /></ClientProtectedRoute>} />
           <Route path="/cliente/compras" element={<ClientProtectedRoute><ClientPurchases /></ClientProtectedRoute>} />

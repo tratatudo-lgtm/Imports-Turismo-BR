@@ -148,10 +148,14 @@ export const apiService = {
       body: JSON.stringify({ phone_e164: phoneNumber })
     }),
 
-  verifyOtp: (phoneNumber: string, otp: string) =>
+  verifyOtp: (phoneNumber: string, otp: string, clientId?: number) =>
     unifiedAuthFetcher<any>('/verify-otp', {
       method: 'POST',
-      body: JSON.stringify({ phone_e164: phoneNumber, code: otp })
+      body: JSON.stringify({ 
+        phone_e164: phoneNumber, 
+        code: otp,
+        ...(clientId ? { clientId } : {})
+      })
     }),
 
   getSession: () =>
@@ -162,13 +166,13 @@ export const apiService = {
 
   // Admin Auth (Aliased to Unified Auth for compatibility)
   sendAdminOtp: (phoneNumber: string) => apiService.sendOtp(phoneNumber),
-  verifyAdminOtp: (phoneNumber: string, otp: string) => apiService.verifyOtp(phoneNumber, otp),
+  verifyAdminOtp: (phoneNumber: string, otp: string) => apiService.verifyOtp(phoneNumber, otp, 26),
   getAdminSession: () => apiService.getSession(),
   logoutAdmin: () => apiService.logout(),
 
   // Client Auth (Aliased to Unified Auth for compatibility)
   requestClientOtp: (phoneNumber: string) => apiService.sendOtp(phoneNumber),
-  verifyClientOtp: (phoneNumber: string, otp: string) => apiService.verifyOtp(phoneNumber, otp),
+  verifyClientOtp: (phoneNumber: string, otp: string) => apiService.verifyOtp(phoneNumber, otp, 26),
   // getSession is already defined above
   getAdminTickets: () => 
     adminFetcher<any>('/admin/tickets').then(res => res.tickets || []),
