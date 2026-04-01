@@ -47,21 +47,17 @@ export default function ClientDashboard() {
         ]);
 
         if (!sessionRes || !sessionRes.authenticated) {
-          navigate('/cliente/login');
+          navigate('/login');
           return;
         }
 
         setSession(sessionRes);
         setStats(statsRes?.stats || null);
         setTickets(ticketsRes?.tickets || []);
-        
-        localStorage.setItem('client_data', JSON.stringify(sessionRes));
       } catch (err: any) {
         // Only show error if it's a real failure, not just empty data
         if (err.message?.includes('401')) {
-          localStorage.removeItem('client_token');
-          localStorage.removeItem('client_data');
-          navigate('/cliente/login');
+          navigate('/login');
         } else {
           setError(err.message || 'Erro ao carregar dados do painel.');
         }
@@ -91,10 +87,15 @@ export default function ClientDashboard() {
     return kind.includes('reclam') || category.includes('pos_venda') || category.includes('reclam');
   });
 
-  const handleLogout = () => {
-    localStorage.removeItem('client_token');
-    localStorage.removeItem('client_data');
-    navigate('/cliente/login');
+  const handleLogout = async () => {
+    try {
+      await apiService.logout();
+      localStorage.removeItem('acting_as');
+      navigate('/login');
+    } catch (err) {
+      console.error('Erro ao fazer logout:', err);
+      navigate('/login');
+    }
   };
 
   const handleDownload = async (docId: string, fileName: string) => {

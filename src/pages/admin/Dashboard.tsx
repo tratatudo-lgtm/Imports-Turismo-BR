@@ -39,25 +39,27 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'leads' | 'pedidos' | 'reclamacoes'>('pedidos');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const adminPhone = localStorage.getItem('admin_phone');
+  const [session, setSession] = useState<any>(null);
   const activeStatuses = ['pendente', 'em_processamento', 'aguardando_pagamento', 'novo'];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ticketsRes, statsRes, clientsRes] = await Promise.all([
+        const [ticketsRes, statsRes, clientsRes, sessionRes] = await Promise.all([
           apiService.getAdminTickets().catch(() => []),
           apiService.getAdminTicketStats().catch(() => ({ activeTickets: 0, complaints: 0, totalTickets: 0 })),
-          apiService.getAdminClients().catch(() => [])
+          apiService.getAdminClients().catch(() => []),
+          apiService.getSession().catch(() => null)
         ]);
 
         setTickets(ticketsRes);
         setStats(statsRes);
         setClients(clientsRes);
+        setSession(sessionRes);
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar dados do dashboard.');
         if (err.message?.includes('401')) {
-          navigate('/admin/login');
+          navigate('/login');
         }
       } finally {
         setIsLoading(false);
@@ -69,12 +71,13 @@ export default function AdminDashboard() {
 
   const handleLogout = async () => {
     try {
-      await apiService.logoutAdmin();
+      await apiService.logout();
+      localStorage.removeItem('acting_as');
+      navigate('/login');
     } catch (err) {
       console.error('Erro ao fazer logout:', err);
+      navigate('/login');
     }
-    localStorage.removeItem('admin_phone');
-    navigate('/admin/login');
   };
 
   const isComplaint = (t: AdminTicket) => {
@@ -173,7 +176,7 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <p className="text-sm font-bold text-blue-950">Consultor Autorizado</p>
-            <p className="text-xs text-gray-400">{adminPhone}</p>
+            <p className="text-xs text-gray-400">{session?.phone_e164}</p>
           </div>
           <button 
             onClick={handleLogout}
@@ -508,7 +511,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs text-blue-100/60 uppercase tracking-widest font-bold">Telefone de Acesso</p>
-                  <p className="text-lg font-bold">{adminPhone}</p>
+                  <p className="text-lg font-bold">{session?.phone_e164}</p>
                 </div>
                 <div className="pt-4 border-t border-white/10">
                   <p className="text-xs text-blue-100/60 leading-relaxed">

@@ -4,17 +4,45 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Plane, Phone, ChevronRight } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, Plane, Phone, ChevronRight, LogOut } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { siteConfig } from '../config/site';
+import { apiService } from '../services/api';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [actingAs, setActingAs] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const session = await apiService.getSession();
+        setIsAuthenticated(session.authenticated);
+        setActingAs(localStorage.getItem('acting_as'));
+      } catch (err) {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, [location.pathname]);
+
+  const handleLogout = async () => {
+    try {
+      await apiService.logout();
+      localStorage.removeItem('acting_as');
+      setIsAuthenticated(false);
+      navigate('/');
+    } catch (err) {
+      console.error('Erro ao sair:', err);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -85,24 +113,50 @@ export const Navbar = () => {
           ))}
           
           <div className="flex items-center gap-3 border-l border-white/10 pl-8 ml-2">
-            <Link 
-              to="/admin/login" 
-              className={cn(
-                "text-[10px] font-bold uppercase tracking-widest transition-colors",
-                isScrolled ? "text-blue-950/30 hover:text-blue-600" : "text-white/30 hover:text-white"
-              )}
-            >
-              Admin
-            </Link>
-            <Button 
-              variant={isScrolled ? "primary" : "secondary"} 
-              size="sm"
-              className="rounded-xl"
-              onClick={() => window.open(`https://wa.me/${siteConfig.whatsapp}`, '_blank')}
-            >
-              <Phone className="w-4 h-4 mr-2" />
-              WhatsApp
-            </Button>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-4">
+                <Link 
+                  to={actingAs === 'admin' ? '/admin/dashboard' : '/cliente/dashboard'}
+                  className={cn(
+                    "text-[10px] font-bold uppercase tracking-widest transition-colors",
+                    isScrolled ? "text-blue-600" : "text-amber-400"
+                  )}
+                >
+                  {actingAs === 'admin' ? 'Painel Admin' : 'Minha Área'}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className={cn(
+                    "p-2 rounded-lg transition-colors",
+                    isScrolled ? "hover:bg-red-50 text-red-500" : "hover:bg-white/10 text-white/50 hover:text-white"
+                  )}
+                  title="Sair"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link 
+                  to="/login" 
+                  className={cn(
+                    "text-[10px] font-bold uppercase tracking-widest transition-colors",
+                    isScrolled ? "text-blue-950/30 hover:text-blue-600" : "text-white/30 hover:text-white"
+                  )}
+                >
+                  Entrar
+                </Link>
+                <Button 
+                  variant={isScrolled ? "primary" : "secondary"} 
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={() => window.open(`https://wa.me/${siteConfig.whatsapp}`, '_blank')}
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  WhatsApp
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
@@ -158,16 +212,29 @@ export const Navbar = () => {
                   <Phone className="w-5 h-5 mr-2" />
                   WhatsApp Comercial
                 </Button>
-                <Link to="/cliente/login" className="w-full">
-                  <Button variant="outline" className="w-full h-14 rounded-2xl text-lg font-bold border-blue-100 text-blue-600">
-                    Entrar na Área Cliente
-                  </Button>
-                </Link>
-                <Link to="/admin/login" className="w-full">
-                  <Button variant="outline" className="w-full h-14 rounded-2xl text-lg font-bold border-blue-100 text-blue-600">
-                    Entrar na Área Admin
-                  </Button>
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <Link to={actingAs === 'admin' ? '/admin/dashboard' : '/cliente/dashboard'} className="w-full">
+                      <Button variant="outline" className="w-full h-14 rounded-2xl text-lg font-bold border-blue-100 text-blue-600">
+                        {actingAs === 'admin' ? 'Painel Admin' : 'Minha Área'}
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full h-14 rounded-2xl text-lg font-bold text-red-500"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="w-5 h-5 mr-2" />
+                      Sair da Conta
+                    </Button>
+                  </>
+                ) : (
+                  <Link to="/login" className="w-full">
+                    <Button variant="outline" className="w-full h-14 rounded-2xl text-lg font-bold border-blue-100 text-blue-600">
+                      Entrar na Conta
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>

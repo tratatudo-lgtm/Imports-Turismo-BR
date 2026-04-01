@@ -16,8 +16,9 @@ import Privacy from './pages/Privacy';
 import Cookies from './pages/Cookies';
 import Contacts from './pages/Contacts';
 import SupportCenter from './pages/SupportCenter';
-import AdminLogin from './pages/admin/Login';
+import UnifiedLogin from './pages/UnifiedLogin';
 import { ProtectedRoute as AdminProtectedRoute } from './components/admin/ProtectedRoute';
+import { ProtectedRoute as ClientProtectedRoute } from './components/client/ProtectedRoute';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminCRM from './pages/admin/CRM';
 import AdminCustomerDetail from './pages/admin/CustomerDetail';
@@ -54,8 +55,12 @@ export default function App() {
           <Route path="/contactos" element={<Contacts />} />
           <Route path="/centro-apoio" element={<SupportCenter />} />
 
+          {/* Auth Routes */}
+          <Route path="/login" element={<UnifiedLogin />} />
+          <Route path="/admin/login" element={<UnifiedLogin />} />
+          <Route path="/cliente/login" element={<UnifiedLogin />} />
+
           {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
           <Route path="/admin/crm" element={<AdminProtectedRoute><AdminCRM /></AdminProtectedRoute>} />
           <Route path="/admin/crm/:id" element={<AdminProtectedRoute><AdminCustomerDetail /></AdminProtectedRoute>} />
@@ -66,14 +71,14 @@ export default function App() {
           <Route path="/admin/travel/payments/:id" element={<AdminProtectedRoute><AdminTravelPaymentDetail /></AdminProtectedRoute>} />
 
           {/* Client Routes */}
-          <Route path="/cliente/login" element={<ClientLogin />} />
+          <Route path="/cliente/login" element={<UnifiedLogin />} />
           <Route path="/cliente/verify-magic-link" element={<MagicLinkCallback />} />
-          <Route path="/cliente/dashboard" element={<ClientDashboard />} />
-          <Route path="/cliente/compras" element={<ClientPurchases />} />
-          <Route path="/cliente/documentos" element={<ClientDocuments />} />
-          <Route path="/cliente/apoio" element={<ClientSupport />} />
-          <Route path="/cliente/perfil" element={<ClientProfile />} />
-          <Route path="/cliente/tickets/:id" element={<TicketDetail />} />
+          <Route path="/cliente/dashboard" element={<ClientProtectedRoute><ClientDashboard /></ClientProtectedRoute>} />
+          <Route path="/cliente/compras" element={<ClientProtectedRoute><ClientPurchases /></ClientProtectedRoute>} />
+          <Route path="/cliente/documentos" element={<ClientProtectedRoute><ClientDocuments /></ClientProtectedRoute>} />
+          <Route path="/cliente/apoio" element={<ClientProtectedRoute><ClientSupport /></ClientProtectedRoute>} />
+          <Route path="/cliente/perfil" element={<ClientProtectedRoute><ClientProfile /></ClientProtectedRoute>} />
+          <Route path="/cliente/tickets/:id" element={<ClientProtectedRoute><TicketDetail /></ClientProtectedRoute>} />
         </Routes>
       </Layout>
     </Router>

@@ -99,11 +99,11 @@ const platformFetcher = <T>(endpoint: string, options?: RequestInit) =>
   baseFetcher<T>('/api/platform', endpoint, options, false);
 
 /**
- * internalAdminFetcher: Calls internal proxy routes (/api/admin/*)
- * to communicate with the TrataTudo Admin API securely.
+ * unifiedAuthFetcher: Calls internal proxy routes (/api/auth/*)
+ * to handle unified WhatsApp/OTP login for both Admin and Client.
  */
-const internalAdminFetcher = <T>(endpoint: string, options?: RequestInit) =>
-  baseFetcher<T>('/api/admin', endpoint, options, false);
+const unifiedAuthFetcher = <T>(endpoint: string, options?: RequestInit) =>
+  baseFetcher<T>('/api/auth', endpoint, options, false);
 
 export const apiService = {
   // Public Endpoints (using publicFetcher)
@@ -141,26 +141,35 @@ export const apiService = {
       body: JSON.stringify({ site_key: SITE_KEY, sessionId, message })
     }),
 
-  // Admin Auth (using internalAdminFetcher)
-  sendAdminOtp: (phoneNumber: string) =>
-    internalAdminFetcher<OtpResponse>('/auth/send-otp', {
+  // Unified Auth (using unifiedAuthFetcher)
+  sendOtp: (phoneNumber: string) =>
+    unifiedAuthFetcher<OtpResponse>('/send-otp', {
       method: 'POST',
       body: JSON.stringify({ phone_e164: phoneNumber })
     }),
 
-  verifyAdminOtp: (phoneNumber: string, otp: string) =>
-    internalAdminFetcher<VerifyOtpResponse>('/auth/verify-otp', {
+  verifyOtp: (phoneNumber: string, otp: string) =>
+    unifiedAuthFetcher<any>('/verify-otp', {
       method: 'POST',
       body: JSON.stringify({ phone_e164: phoneNumber, code: otp })
     }),
 
-  getAdminSession: () =>
-    internalAdminFetcher<AdminSession>('/auth/session'),
+  getSession: () =>
+    unifiedAuthFetcher<any>('/session'),
 
-  logoutAdmin: () =>
-    internalAdminFetcher<any>('/auth/logout', { method: 'POST' }),
+  logout: () =>
+    unifiedAuthFetcher<any>('/logout', { method: 'POST' }),
 
-  // Admin Dashboard (Session-based)
+  // Admin Auth (Aliased to Unified Auth for compatibility)
+  sendAdminOtp: (phoneNumber: string) => apiService.sendOtp(phoneNumber),
+  verifyAdminOtp: (phoneNumber: string, otp: string) => apiService.verifyOtp(phoneNumber, otp),
+  getAdminSession: () => apiService.getSession(),
+  logoutAdmin: () => apiService.logout(),
+
+  // Client Auth (Aliased to Unified Auth for compatibility)
+  requestClientOtp: (phoneNumber: string) => apiService.sendOtp(phoneNumber),
+  verifyClientOtp: (phoneNumber: string, otp: string) => apiService.verifyOtp(phoneNumber, otp),
+  // getSession is already defined above
   getAdminTickets: () => 
     adminFetcher<any>('/admin/tickets').then(res => res.tickets || []),
   
@@ -276,22 +285,6 @@ export const apiService = {
   // Legacy Admin Sales
   getAdminVendas: () => 
     adminFetcher<Sale[]>('/admin/vendas'),
-
-  // Client Auth
-  requestClientOtp: (phoneNumber: string) => 
-    privateFetcher<OtpResponse>('/auth/send-otp', { 
-      method: 'POST', 
-      body: JSON.stringify({ phone_e164: phoneNumber }) 
-    }),
-  
-  verifyClientOtp: (phoneNumber: string, otp: string) => 
-    privateFetcher<ClientSession>('/auth/verify-otp', { 
-      method: 'POST', 
-      body: JSON.stringify({ phone_e164: phoneNumber, code: otp }) 
-    }),
-
-  getSession: () => 
-    privateFetcher<any>('/auth/session'),
 
   requestMagicLink: (email: string) => 
     privateFetcher<MagicLinkResponse>('/auth/request-magic-link', { method: 'POST', body: JSON.stringify({ email }) }),

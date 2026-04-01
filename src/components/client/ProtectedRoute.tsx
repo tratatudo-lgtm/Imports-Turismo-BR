@@ -21,14 +21,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         const session = await apiService.getSession();
         const actingAs = localStorage.getItem('acting_as');
 
-        if (session.authenticated === true && session.can_act_as_admin && actingAs === 'admin') {
+        if (session.authenticated === true && session.can_act_as_client && actingAs === 'client') {
           setIsVerifying(false);
         } else {
           localStorage.removeItem('acting_as');
           navigate('/login');
         }
       } catch (err) {
-        console.error('Sessão admin inválida:', err);
+        console.error('Sessão cliente inválida:', err);
         localStorage.removeItem('acting_as');
         navigate('/login');
       }
