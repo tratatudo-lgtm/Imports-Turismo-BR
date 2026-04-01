@@ -31,19 +31,24 @@ import {
   AdminTravelStats
 } from '../types';
 
-const PUBLIC_API_BASE_URL = 'https://api.tratatudo.pt/api/public';
+const PUBLIC_API_BASE_URL = '/api/public';
 const PRIVATE_API_BASE_URL = 'https://api.tratatudo.pt/api';
 const SITE_KEY = 'imports-turismo-br';
 
 async function baseFetcher<T>(baseUrl: string, endpoint: string, options?: RequestInit, appendSiteKey: boolean = false): Promise<T> {
-  const url = new URL(`${baseUrl}${endpoint}`, window.location.origin);
+  // Use relative URL if baseUrl starts with /
+  const url = baseUrl.startsWith('/') 
+    ? `${baseUrl}${endpoint}`
+    : new URL(`${baseUrl}${endpoint}`, window.location.origin).toString();
+  
+  const finalUrl = new URL(url, window.location.origin);
   
   // Append site_key to query params if requested
   if (appendSiteKey) {
-    url.searchParams.append('site_key', SITE_KEY);
+    finalUrl.searchParams.append('site_key', SITE_KEY);
   }
 
-  const response = await fetch(url.toString(), {
+  const response = await fetch(finalUrl.toString(), {
     ...options,
     headers: {
       'Content-Type': 'application/json',

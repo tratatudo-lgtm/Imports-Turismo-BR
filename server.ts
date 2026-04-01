@@ -146,6 +146,29 @@ async function startServer() {
     }
   };
 
+  /**
+   * Public Request Proxy Helper
+   * Maps frontend fields (nome, telefone, email) to Platform API fields (name, phone, email)
+   */
+  const publicRequestProxy = async (req: express.Request, res: express.Response, type: string) => {
+    const { nome, telefone, email, ...metadata } = req.body;
+    
+    // Map fields for Platform API
+    req.body = {
+      name: nome || metadata.name,
+      phone: telefone || metadata.phone,
+      email: email || metadata.email,
+      source: SITE_KEY,
+      metadata: {
+        ...metadata,
+        site_key: SITE_KEY,
+        type: type
+      }
+    };
+
+    return platformProxy(req, res, "/leads");
+  };
+
   // --- Platform API Proxy Routes ---
   app.get("/api/platform/client/profile", (req, res) => platformProxy(req, res, "/client/profile"));
   app.get("/api/platform/client/config", (req, res) => platformProxy(req, res, "/client/config"));
@@ -160,6 +183,13 @@ async function startServer() {
   app.post("/api/auth/verify-otp", (req, res) => unifiedAuthProxy(req, res, "/verify-otp"));
   app.get("/api/auth/session", (req, res) => unifiedAuthProxy(req, res, "/session"));
   app.post("/api/auth/logout", (req, res) => unifiedAuthProxy(req, res, "/logout"));
+
+  // --- Public Proxy Routes (Leads/Requests) ---
+  app.post("/api/public/request", (req, res) => publicRequestProxy(req, res, req.body.type || "orcamento"));
+  app.post("/api/public/complaint", (req, res) => publicRequestProxy(req, res, "reclamacao"));
+  app.get("/api/public/track/:code", (req, res) => platformProxy(req, res, `/leads/${req.params.code}`));
+  app.post("/api/public/chat/start", (req, res) => platformProxy(req, res, "/chat/start"));
+  app.post("/api/public/chat/message", (req, res) => platformProxy(req, res, "/chat/message"));
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
