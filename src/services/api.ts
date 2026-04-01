@@ -55,8 +55,10 @@ async function baseFetcher<T>(baseUrl: string, endpoint: string, options?: Reque
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Erro desconhecido' }));
-    throw new Error(error.message || `Erro HTTP: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    // Improved error handling: check for message, error, or ok: false with error
+    const errorMessage = errorData.message || errorData.error || (errorData.ok === false && errorData.error) || `Erro HTTP: ${response.status}`;
+    throw new Error(errorMessage);
   }
 
   // Handle blob responses
@@ -96,6 +98,13 @@ const adminFetcher = <T>(endpoint: string, options?: RequestInit) => {
 const platformFetcher = <T>(endpoint: string, options?: RequestInit) =>
   baseFetcher<T>('/api/platform', endpoint, options, false);
 
+/**
+ * internalAdminFetcher: Calls internal proxy routes (/api/admin/*)
+ * to communicate with the TrataTudo Admin API securely.
+ */
+const internalAdminFetcher = <T>(endpoint: string, options?: RequestInit) =>
+  baseFetcher<T>('/api/admin', endpoint, options, false);
+
 export const apiService = {
   // Public Endpoints (using publicFetcher)
   createQuote: (data: any) => 
@@ -132,24 +141,24 @@ export const apiService = {
       body: JSON.stringify({ site_key: SITE_KEY, sessionId, message })
     }),
 
-  // Admin Auth (using privateFetcher)
+  // Admin Auth (using internalAdminFetcher)
   sendAdminOtp: (phoneNumber: string) =>
-    privateFetcher<OtpResponse>('/admin/auth/send-otp', {
+    internalAdminFetcher<OtpResponse>('/auth/send-otp', {
       method: 'POST',
       body: JSON.stringify({ phone_e164: phoneNumber })
     }),
 
   verifyAdminOtp: (phoneNumber: string, otp: string) =>
-    privateFetcher<VerifyOtpResponse>('/admin/auth/verify-otp', {
+    internalAdminFetcher<VerifyOtpResponse>('/auth/verify-otp', {
       method: 'POST',
       body: JSON.stringify({ phone_e164: phoneNumber, code: otp })
     }),
 
   getAdminSession: () =>
-    privateFetcher<AdminSession>('/admin/auth/session'),
+    internalAdminFetcher<AdminSession>('/auth/session'),
 
   logoutAdmin: () =>
-    privateFetcher<any>('/admin/auth/logout', { method: 'POST' }),
+    internalAdminFetcher<any>('/auth/logout', { method: 'POST' }),
 
   // Admin Dashboard (Session-based)
   getAdminTickets: () => 
