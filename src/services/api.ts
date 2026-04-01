@@ -89,6 +89,10 @@ const adminFetcher = <T>(endpoint: string, options?: RequestInit) => {
   }, false);
 };
 
+/**
+ * platformFetcher: Calls internal proxy routes (/api/platform/*)
+ * to communicate with the TrataTudo Platform API securely.
+ */
 const platformFetcher = <T>(endpoint: string, options?: RequestInit) =>
   baseFetcher<T>('/api/platform', endpoint, options, false);
 
@@ -286,9 +290,36 @@ export const apiService = {
   verifyMagicLink: (token: string) => 
     privateFetcher<ClientSession>('/auth/verify-magic-link', { method: 'POST', body: JSON.stringify({ token }) }),
 
-  // Client Area (Platform API Proxy)
+  // --- Client Area (Platform API Proxy Layer) ---
+
   getClientDashboardStats: () => 
     platformFetcher<any>('/dashboard/summary'),
+
+  getClientPurchases: () => 
+    platformFetcher<any>('/travel/orders'),
+  
+  getClientSupport: () => 
+    platformFetcher<any>('/messages'),
+  
+  getClientProfile: () => 
+    platformFetcher<any>('/client/profile'),
+
+  getClientConfig: () =>
+    platformFetcher<any>('/client/config'),
+
+  sendClientMessage: (data: any) =>
+    platformFetcher<any>('/messages/send', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+
+  createClientTravelOrder: (data: any) =>
+    platformFetcher<any>('/travel/orders', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+
+  // --- Local Client Area (Session-based) ---
 
   getClientTickets: () => 
     privateFetcher<{ ok: boolean; tickets: any[] }>('/client/tickets'),
@@ -302,21 +333,9 @@ export const apiService = {
   getTicketHistory: (id: string) => 
     privateFetcher<any[]>(`/client/tickets/${id}/history`),
   
-  getClientPurchases: () => 
-    platformFetcher<any>('/travel/orders'),
-  
   getClientDocuments: () => 
     privateFetcher<{ ok: boolean; documents: any[] }>('/client/documents'),
   
   downloadDocument: (id: string) => 
     privateFetcher<Blob>(`/client/documents/${id}/download`),
-  
-  getClientSupport: () => 
-    platformFetcher<any>('/messages'),
-  
-  getClientProfile: () => 
-    platformFetcher<any>('/client/profile'),
-
-  getClientConfig: () =>
-    platformFetcher<any>('/client/config'),
 };

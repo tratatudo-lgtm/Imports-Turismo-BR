@@ -18,16 +18,24 @@ async function startServer() {
 
   app.use(express.json());
 
-  // TrataTudo Platform API Proxy
+  /**
+   * Health Check Route
+   */
+  app.get("/health", (req, res) => {
+    res.json({ ok: true, service: 'imports-turismo-br' });
+  });
+
+  // TrataTudo Platform API Proxy Configuration
   const TRATATUDO_API_URL = process.env.TRATATUDO_API_URL || "https://platform-api.tratatudo.pt/v1";
   const TRATATUDO_API_KEY = process.env.TRATATUDO_API_KEY;
 
   /**
    * Universal Proxy Helper for Platform API
+   * Handles GET, POST, PATCH, PUT with secure Authorization header
    */
   const platformProxy = async (req: express.Request, res: express.Response, endpoint: string) => {
     if (!TRATATUDO_API_KEY) {
-      console.error("TRATATUDO_API_KEY is missing in environment variables.");
+      console.error("[Platform Proxy] TRATATUDO_API_KEY is missing.");
       return res.status(500).json({ error: "Server configuration error: API Key missing." });
     }
 
@@ -56,17 +64,23 @@ async function startServer() {
 
       res.json(data);
     } catch (error: any) {
-      console.error(`Error proxying to Platform API (${endpoint}):`, error);
+      console.error(`[Platform Proxy] Error communicating with ${endpoint}:`, error);
       res.status(500).json({ error: "Failed to communicate with Platform API." });
     }
   };
 
-  // Platform API Routes (Internal Proxy)
+  // --- Platform API Proxy Routes (Internal) ---
+
+  // GET Endpoints
   app.get("/api/platform/client/profile", (req, res) => platformProxy(req, res, "/client/profile"));
   app.get("/api/platform/client/config", (req, res) => platformProxy(req, res, "/client/config"));
   app.get("/api/platform/dashboard/summary", (req, res) => platformProxy(req, res, "/dashboard/summary"));
   app.get("/api/platform/travel/orders", (req, res) => platformProxy(req, res, "/travel/orders"));
   app.get("/api/platform/messages", (req, res) => platformProxy(req, res, "/messages"));
+
+  // POST Endpoints
+  app.post("/api/platform/messages/send", (req, res) => platformProxy(req, res, "/messages/send"));
+  app.post("/api/platform/travel/orders", (req, res) => platformProxy(req, res, "/travel/orders"));
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
